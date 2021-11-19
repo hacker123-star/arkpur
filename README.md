@@ -42,5 +42,5 @@
 <br />
 
 [website]: https://arkpur.ga
-[youtube]: https://youtube.com/PROZOROARK
+[youtube]: https://youtube.com/channel/UCclP_WylhIFjMeXgdDEzbcw
 [instagram]: https://instagram.com/mr_otakun_x
