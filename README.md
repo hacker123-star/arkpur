@@ -1,5 +1,5 @@
 # arkpur
-### Hi there, I'm Rohan - aka [PRO ZOROARK][website] 👋 
+### Hi there, I'm Rohan - aka [Rovan][website] 👋 
 
 [![Website](https://www.arkpur.ga/images/arkpur.png)](https://arkpur.ga)
 
@@ -14,7 +14,7 @@
 - ### Connect with me:
 
 [<img align="left" alt="arkpur.ga" width="22px" src="https://raw.githubusercontent.com/iconic/open-iconic/master/svg/globe.svg" />][website]
-[<img align="left" alt="PRO ZOROARK | YouTube" width="22px" src="https://cdn.jsdelivr.net/npm/simple-icons@v3/icons/youtube.svg" />][youtube]
+[<img align="left" alt="Rovan Spot | YouTube" width="22px" src="https://cdn.jsdelivr.net/npm/simple-icons@v3/icons/youtube.svg" />][youtube]
 [<img align="left" alt="mr_otakun_x | Instagram" width="22px" src="https://cdn.jsdelivr.net/npm/simple-icons@v3/icons/instagram.svg" />][instagram]
 
 <br />
