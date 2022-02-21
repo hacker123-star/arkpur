@@ -1,0 +1,12 @@
+* {
+  font-size: 15px;
+  font-family: sans-serif;
+}
+
+.let {
+  width: 10px;
+  height: 10px;
+  position: absolute;
+  bottom: 300px;
+  text-align: center;
+}
