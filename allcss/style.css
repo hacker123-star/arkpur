@@ -1,0 +1,142 @@
+* {
+  color: #FFFFFF;
+}
+
+body {
+  background-color: #000000;
+}
+
+.title {
+  color: #FF0000;
+  background-color: #B61DA096;
+  border: solid 3px #21D938;
+  border-radius: 25px;
+}
+
+img {
+  border: solid 1px #8D4D71;
+  border-radius: 5px;
+  width: 111px;
+  height: 111px;
+}
+
+h2 {
+  border: solid 1px #008AFF;
+  border-radius: 5px;
+  background-color: #A5FF0063;
+  position: relative;
+}
+
+h2::before,
+h2::after {
+  position: absolute;
+  content: "";
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+
+h2::before {
+  background-color: #000000;
+  animation: leftFade 3s steps(10000) forwards;
+}
+
+.memberList {
+  position: relative;
+  background-color: #7892DE85;
+}
+
+.memberList::before,
+.memberList::after {
+  position: absolute;
+  content: "";
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+}
+
+.memberList::before {
+  background-color: #000000;
+  animation: rightFade 3s steps(10000) forwards;
+}
+
+.op {
+  color: #FF7B00;
+  background-color: #FF7B00A6;
+}
+
+table {
+  background-color: #2D994896;
+}
+
+td {
+  color: #38CAED;
+  background-color: #7892DE85;
+  border: solid 1px;
+}
+
+th {
+  border: solid 1px;
+}
+
+.lh3 {
+  color: #00ACFF;
+  background-color: #00FF9B;
+  border: solid 2px #00FFD2B3;
+  border-radius: 15px;
+}
+
+fieldset {
+  margin-top: 10px;
+  background-image: linear-gradient(210deg, red, yellow)
+}
+
+.mcpedl,
+.gamespan {
+  color: black;
+}
+
+.gamel,
+.dlink {
+  border: solid 1px #433D99;
+  border-radius: 10px;
+  color: #00FF60;
+  background-color: #BF3ED9;
+  text-decoration: none;
+  margin: 1px;
+  padding: 1px;
+}
+
+b {
+  color: red;
+  font-size: 20px
+}
+
+
+.info {
+  text-align: center;
+  background-color: #898CAB73;
+  position: absolute;
+  width: 100%;
+}
+
+.social {
+  display: flex;
+  flex: row;
+}
+
+
+@keyframes leftFade {
+  to {
+    left: 100%;
+  }
+}
+
+@keyframes rightFade {
+  to {
+    right: 100%;
+  }
+}
