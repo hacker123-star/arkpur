@@ -131,7 +131,9 @@ b {
 
 .social {
   display: flex;
-  flex: row;
+
+
+   justify-content: center;
 }
 
 @keyframes leftFade {
