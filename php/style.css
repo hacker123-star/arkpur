@@ -1,0 +1,63 @@
+body {
+  font-size: 15pt;
+  background-color: #B5A166;
+  display: grid;
+  text-align: center;
+}
+
+.header {
+  text-align: center;
+}
+
+.main {
+  text-align: center;
+}
+
+h1 {
+  color: #7D2828E0;
+  text-decoration: underline;
+  background-color: #317A824A;
+  position: relative;
+}
+
+h1::before,
+h1::after {
+  position: absolute;
+  content: "";
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+}
+
+form {
+  border: solid 3px #0005FF;
+  display: block;
+  text-align: center;
+  justify-content: center;
+}
+
+button {
+  font-size: 20px;
+  color: goldenrod;
+  background-color: sienna;
+  margin: 5px;
+  padding: 10px;
+}
+
+h1::before {
+ background-color: #B5A166;
+  animation: amt 3s steps(100) forwards;
+}
+
+@keyframes amt {
+  to {
+    left: 100%;
+  }
+}
+
+img {
+  width: 170px;
+  height: 200px;
+}
