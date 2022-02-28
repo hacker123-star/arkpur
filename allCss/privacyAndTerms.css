@@ -1,0 +1,41 @@
+* {
+  color: #FFFFFF;
+}
+
+body {
+  background: url(../images/bg1.jpeg) no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  opacity: 96%;
+}
+
+h2 {
+  color: red;
+}
+
+h3 {
+  color: yellow;
+}
+
+p {
+  color: green;
+}
+
+ol {
+  color: green;
+}
+
+li {
+  color: green;
+}
+
+a {
+  color: blue;
+  text-decoration: none;
+}
+
+strong {
+  color: yellow;
+}
