@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
 body {
   text-align: center;
   background-image: url(../images/bg.jpg);
@@ -21,26 +22,29 @@ body {
 
 .mcpeName {
   display: flex;
+  text-align: start;
 }
 
 .mcpeIcon {
   display: block;
-  justify-content: start;
+  justify-content: start; 
+  margin: 2px;
+  padding: 3px;
 }
 
 .column {
-  margin: 5px;
-  padding: 5px;
+  margin: 0px;
+  padding: 0px;
   display: flex;
   flex-direction: column;
 }
 
 .icon {
-  border-radius: 20%;
+  border-radius: 20%; 
   height: 75px;
   width: 75px;
   margin: 0;
-  padding: 1px;
+  padding: 0px;
 }
 
 .by {
@@ -69,6 +73,8 @@ h2 {
 
 
 .heading {
+  font-size: 35px;
+  font-family: 'Lobster', cursive;
   border: solid 1px #00A2FF ;
   border-radius: 15px;
   text-align: center;
@@ -106,10 +112,10 @@ h2 {
 
 img {
   display: flex;
-  margin: 3px;
-  padding: 10px;
-  height: 75px;
-  width: 75px;
+  margin: 0;
+  padding: 0;
+  height: 85px;
+  width: 85px;
 }
 
 .cont {
