@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Login/Signup Page</title>
+  <style>
+    /* Reset default browser styles */
+    body,
+    h1,
+    p,
+    input {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Set a background color and center the content */
+    body {
+      background-color: #f3f3f3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    /* Create a container for the form */
+    .container {
+      max-width: 400px;
+      padding: 40px;
+      background-color: #ffffff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    /* Style the form headings */
+    h1 {
+      font-size: 24px;
+      color: #333333;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* Style the form inputs */
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #dddddd;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+    }
+
+    /* Style the form buttons */
+    .button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: #ffffff;
+      text-decoration: none;
+      border: none;
+      border-radius: 4px;
+      text-align: center;
+      transition: background-color 0.3s;
+    }
+
+    .button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Style the switch button for login/signup toggle */
+    .switch-button {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .switch-button button {
+      background-color: transparent;
+      color: #007bff;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 5px;
+      transition: color 0.3s;
+    }
+
+    .switch-button button:hover {
+      color: #0056b3;
+    }
+
+    /* Hide the signup form initially */
+    #signup-form {
+      display: none;
+    }
+    
+    #log{
+      display: block;
+    }
+    
+    #sig{
+      display: none;
+    }
+
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1 id="log">Login</h1>
+    <form id="login-form">
+      <input type="text" placeholder="Username" required>
+      <input type="password" placeholder="Password" required>
+      <div class="g-recaptcha" data-sitekey="6LcuJO0mAAAAANs-glNxCnvBZDmYOZyfTU3jPQUe"></div>
+      <button class="button" type="submit">Login</button>
+    </form>
+    <h1 id="sig">Sign Up</h1>
+    <form id="signup-form">
+      <input type="text" placeholder="Full Name" required>
+      <input type="text" placeholder="Email" required>
+      <input type="password" placeholder="Password" required>
+      <div class="g-recaptcha" data-sitekey="YOUR_RECAPTCHA_SITE_KEY"></div>
+      <button class="button" type="submit">Sign Up</button>
+    </form>
+
+    <div class="switch-button">
+      <button onclick="toggleForm()">Don't have an account? Sign up</button>
+    </div>
+  </div>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <script>
+    function toggleForm() {
+      var loginForm = document.getElementById('login-form');
+      var signupForm = document.getElementById('signup-form');
+      var switchButton = document.querySelector('.switch-button button');
+      
+      var log = document.getElementById('log');
+      var sig = document.getElementById('sig');
+
+      if (loginForm.style.display === 'none' || loginForm.style.display === '') {
+        loginForm.style.display = 'block';
+        signupForm.style.display = 'none';
+        switchButton.textContent = "Don't have an account? Sign up";
+        
+       log.style.display = 'block';
+       sig.style.display = 'none';
+      } else {
+        loginForm.style.display = 'none';
+        signupForm.style.display = 'block';
+        switchButton.textContent = "Already have an account? Login";
+        log.style.display = 'none';
+        sig.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+
+</html>
