@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f2f2f2;
+    }
+
+    h2 {
+      text-align: center;
+      padding: 20px;
+      color: #ff6600;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff8e1;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      background-color: #ffcc80;
+      z-index: 1;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #ffcc80;
+    }
+
+    td i {
+      font-size: 1.2rem;
+      margin-right: 5px;
+    }
+
+    @media screen and (max-width: 600px) {
+
+      th,
+      td {
+        padding: 5px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h2><i class="fas fa-birthday-cake"></i> Birthday Table <i class="fas fa-birthday-cake"></i></h2>
+    <div>
+      <label for="orderSwitch">Order by:</label>
+      <select id="orderSwitch">
+        <option value="alphabetical">Alphabetical</option>
+        <option value="date">Date</option>
+      </select>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Birthday</th>
+        </tr>
+      </thead>
+      <tbody id="birthdayTable">
+
+        <tr>
+          <td>Bhavani</td>
+          <td>30 March</td>
+        </tr>
+        <tr>
+          <td>Chitu</td>
+          <td>24 January</td>
+        </tr>
+        <tr>
+          <td>Deep</td>
+          <td>7 October</td>
+        </tr>
+        <tr>
+          <td>Divya</td>
+          <td>14 December</td>
+        </tr>
+        <tr>
+          <td>Eish</td>
+          <td>27 November</td>
+        </tr>
+        <tr>
+          <td>Fatima</td>
+          <td>15 November</td>
+        </tr>
+        <tr>
+          <td>Ishu</td>
+          <td>1 November</td>
+        </tr>
+        <tr>
+          <td>Ismath</td>
+          <td>5 April</td>
+        </tr>
+        <tr>
+          <td>Jishaa</td>
+          <td>8 November</td>
+        </tr>
+        <tr>
+          <td>Khushi</td>
+          <td>24 April</td>
+        </tr>
+        <tr>
+          <td>Krish</td>
+          <td>12 March</td>
+        </tr>
+        <tr>
+          <td>Lakshay</td>
+          <td>2 September</td>
+        </tr>
+        <tr>
+          <td>Maryam</td>
+          <td>31 December</td>
+        </tr>
+        <tr>
+          <td>Mini</td>
+          <td>21 july</td>
+        </tr>
+        <tr>
+          <td>Nagin</td>
+          <td>21 June</td>
+        </tr>
+        <tr>
+          <td>Nehu</td>
+          <td>29 April</td>
+        </tr>
+        <tr>
+          <td>Rovan</td>
+          <td>20 August</td>
+        </tr>
+        <tr>
+          <td>Sakshi</td>
+          <td>26 January</td>
+        </tr>
+        <tr>
+          <td>Saksham</td>
+          <td>27 February</td>
+        </tr>
+        <tr>
+          <td>Sandu</td>
+          <td>12 January</td>
+        </tr>
+        <tr>
+          <td>Shreya</td>
+          <td>14 December</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const orderSwitch = document.getElementById('orderSwitch');
+    const tableBody = document.getElementById('birthdayTable');
+    const rows = Array.from(tableBody.getElementsByTagName('tr'));
+
+    orderSwitch.addEventListener('change', () => {
+      if (orderSwitch.value === 'alphabetical') {
+        rows.sort((a, b) => a.cells[0].textContent.localeCompare(b.cells[0].textContent));
+      } else if (orderSwitch.value === 'date') {
+        rows.sort((a, b) => new Date(a.cells[1].textContent) - new Date(b.cells[1].textContent));
+      }
+
+      rows.forEach(row => tableBody.appendChild(row));
+    });
+  </script>
+
+</body>
+
+</html>
