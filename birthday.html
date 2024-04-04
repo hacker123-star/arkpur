@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Birthday Table</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,19 +13,34 @@
       background-color: #f2f2f2;
     }
 
-    h2 {
-      text-align: center;
-      padding: 20px;
-      color: #ff6600;
-    }
-
     .container {
       max-width: 800px;
-      margin: 0 auto;
+      margin: 20px auto;
       padding: 20px;
       background-color: #fff;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       border-radius: 10px;
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #ff6600;
+    }
+
+    h2 {
+      margin-top: 0;
+      padding-top: 20px;
+      border-top: 2px solid #ff6600;
+    }
+
+    select {
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #ff6600;
+      border-radius: 5px;
+      background-color: #ffffff;
+      color: #333333;
+      cursor: pointer;
     }
 
     table {
@@ -41,133 +57,143 @@
       z-index: 1;
     }
 
-    th,
-    td {
-      padding: 10px;
+    th, td {
+      padding: 12px;
       text-align: left;
       border-bottom: 1px solid #ddd;
     }
 
     th {
       background-color: #ffcc80;
+      font-weight: bold;
     }
 
     td i {
       font-size: 1.2rem;
       margin-right: 5px;
+      color: #ff6600;
+    }
+
+    tr:hover {
+      background-color: #f0f0f0;
     }
 
     @media screen and (max-width: 600px) {
-
-      th,
-      td {
-        padding: 5px;
+      th, td {
+        padding: 8px;
       }
     }
   </style>
 </head>
-
 <body>
 
-  <div class="container">
-    <h2><i class="fas fa-birthday-cake"></i> Birthday Table <i class="fas fa-birthday-cake"></i></h2>
-    <div>
-      <label for="orderSwitch">Order by:</label>
-      <select id="orderSwitch">
-        <option value="alphabetical">Alphabetical</option>
-        <option value="date">Date</option>
-      </select>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Birthday</th>
-        </tr>
-      </thead>
-      <tbody id="birthdayTable">
-
-        <tr>
-          <td>Bhavani</td>
-          <td>30 March</td>
-        </tr>
-        <tr>
-          <td>Chitu</td>
-          <td>24 January</td>
-        </tr>
-        <tr>
-          <td>Deepanshu</td>
-          <td>7 October</td>
-        </tr>
-        <tr>
-          <td>Fatima</td>
-          <td>15 November</td>
-        </tr>
-        <tr>
-          <td>Ishu</td>
-          <td>1 November</td>
-        </tr>
-        <tr>
-          <td>Ismath</td>
-          <td>5 April</td>
-        </tr>
-        <tr color="pink">
-          <td>Jishaa</td>
-          <td>8 November</td>
-          </tr>
-        <tr>
-          <td>Krish</td>
-          <td>12 March</td>
-        </tr>
-        <tr>
-          <td>Mini</td>
-          <td>21 july</td>
-        </tr>
-        <tr>
-          <td>Nehu</td>
-          <td>29 April</td>
-        </tr>
-        <tr>
-          <td>Ashu</td>
-          <td>29 January</td>
-        </tr>
-        <tr color="blur">
-          <td>Rovan</td>
-          <td>20 August</td>
-        </tr>
-        <tr>
-          <td>Sakshi</td>
-          <td>26 January</td>
-        </tr>
-        <tr>
-          <td>Sandu</td>
-          <td>12 January</td>
-        </tr>
-        <tr>
-          <td>Shreya</td>
-          <td>6 December</td>
-        </tr>
-
-      </tbody>
-    </table>
+<div class="container">
+  <h1><i class="fas fa-birthday-cake"></i> Birthday Celebrations <i class="fas fa-birthday-cake"></i></h1>
+  <h2>Birthday Table</h2>
+  <div style="text-align: center;">
+    <label for="orderSwitch">Order by:</label>
+    <select id="orderSwitch">
+      <option value="alphabetical">Alphabetical</option>
+      <option value="date">Date</option>
+    </select>
+    <input type="text" id="searchInput" placeholder="Search by name...">
   </div>
+  <table>
+    <thead>
+    <tr>
+      <th>Name</th>
+      <th>Birthday</th>
+    </tr>
+    </thead>
+    <tbody id="birthdayTable">
+      <tr>
+        <td>Ashu</td>
+        <td>29 January</td>
+      </tr>
+      <tr>
+        <td>Bhavani</td>
+        <td>30 March</td>
+      </tr>
+      <tr>
+        <td>Chitu</td>
+        <td>24 January</td>
+      </tr>
+      <tr>
+        <td>Deepanshu</td>
+        <td>7 October</td>
+      </tr>
+      <tr>
+        <td>Fatima</td>
+        <td>15 November</td>
+      </tr>
+      <tr>
+        <td>Ishu</td>
+        <td>1 November</td>
+      </tr>
+      <tr>
+        <td>Ismath</td>
+        <td>5 April</td>
+      </tr>
+      <tr>
+        <td>Jishaa</td>
+        <td>8 November</td>
+      </tr>
+      <tr>
+        <td>Krish</td>
+        <td>12 March</td>
+      </tr>
+      <tr>
+        <td>Mini</td>
+        <td>21 July</td>
+      </tr>
+      <tr>
+        <td>Nehu</td>
+        <td>29 April</td>
+      </tr>
+      <tr>
+        <td>Rovan</td>
+        <td>20 August</td>
+      </tr>
+      <tr>
+        <td>Sakshi</td>
+        <td>26 January</td>
+      </tr>
+      <tr>
+        <td>Sandu</td>
+        <td>12 January</td>
+      </tr>
+      <tr>
+        <td>Shreya</td>
+        <td>6 December</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
-  <script>
-    const orderSwitch = document.getElementById('orderSwitch');
-    const tableBody = document.getElementById('birthdayTable');
-    const rows = Array.from(tableBody.getElementsByTagName('tr'));
+<script>
+  const orderSwitch = document.getElementById('orderSwitch');
+  const searchInput = document.getElementById('searchInput');
+  const tableBody = document.getElementById('birthdayTable');
+  const rows = Array.from(tableBody.getElementsByTagName('tr'));
 
-    orderSwitch.addEventListener('change', () => {
-      if (orderSwitch.value === 'alphabetical') {
-        rows.sort((a, b) => a.cells[0].textContent.localeCompare(b.cells[0].textContent));
-      } else if (orderSwitch.value === 'date') {
-        rows.sort((a, b) => new Date(a.cells[1].textContent) - new Date(b.cells[1].textContent));
-      }
+  orderSwitch.addEventListener('change', () => {
+    if (orderSwitch.value === 'alphabetical') {
+      rows.sort((a, b) => a.cells[0].textContent.localeCompare(b.cells[0].textContent));
+    } else if (orderSwitch.value === 'date') {
+      rows.sort((a, b) => new Date(a.cells[1].textContent) - new Date(b.cells[1].textContent));
+    }
 
-      rows.forEach(row => tableBody.appendChild(row));
+    rows.forEach(row => tableBody.appendChild(row));
+  });
+
+  searchInput.addEventListener('input', () => {
+    const searchText = searchInput.value.toLowerCase();
+    rows.forEach(row => {
+      const name = row.cells[0].textContent.toLowerCase();
+      row.style.display = name.includes(searchText) ? '' : 'none';
     });
-  </script>
+  });
+</script>
 
 </body>
-
 </html>
