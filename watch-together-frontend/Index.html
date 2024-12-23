@@ -19,9 +19,12 @@
 <body>
   <h1>Watch Together</h1>
 
-  <div class="video-container">
-  <iframe src="https://drive.google.com/file/d/12yoMi6WOp67qfnwA94NJfbFpk_WPJcrR/preview" allowfullscreen></iframe>
-</div>
+  <div id="video-container">
+    <video id="video-player" controls>
+      <source src="https://drive.google.com/uc?export=download&id=YOUR_GOOGLE_DRIVE_VIDEO_ID" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
 
   <div id="chat-container">
     <div id="messages"></div>
@@ -38,7 +41,7 @@
     const chatMessage = document.getElementById('chat-message');
 
     // Connect to the backend using Socket.io
-    const socket = io('https://watch-together-backend.onrender.com'); // Replace with your Render backend URL
+    const socket = io('https://YOUR-RENDER-BACKEND-URL'); // Replace with your Render backend URL
 
     // Video synchronization
     videoPlayer.addEventListener('play', () => {
