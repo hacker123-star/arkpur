@@ -7,27 +7,36 @@
   <style>
     body { font-family: Arial, sans-serif; margin: 0; padding: 0; text-align: center; }
     #video-container { margin: 20px; }
-    iframe { width: 80%; border: 2px solid #ccc; border-radius: 10px; }
+    video { width: 80%; border: 2px solid #ccc; border-radius: 10px; }
     #chat-container { margin: 20px; display: inline-block; text-align: left; width: 80%; }
     #messages { height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 5px; }
     #message-input { display: flex; margin-top: 10px; }
     #message-input input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px 0 0 5px; }
     #message-input button { padding: 10px; border: none; background: #007BFF; color: white; cursor: pointer; border-radius: 0 5px 5px 0; }
     #message-input button:hover { background: #0056b3; }
+    #username-input { margin: 10px 0; }
   </style>
 </head>
 <body>
   <h1>Watch Together</h1>
 
+  <!-- Username Section -->
+  <div id="username-input">
+    <input type="text" id="username" placeholder="Enter your name" />
+    <button onclick="changeUsername()">Change Name</button>
+  </div>
+
   <div id="video-container">
-    
-    <iframe id="video-player" width="640" height="360" src="https://www.youtube.com/embed/d1n552v1ng0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <video id="video-player" controls>
+      <source src="https://drive.google.com/uc?export=download&id=YOUR_GOOGLE_DRIVE_VIDEO_ID" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
   </div>
 
   <div id="chat-container">
     <div id="messages"></div>
     <div id="message-input">
-      <input type="text" id="chat-message" placeholder="Type your message...">
+      <input type="text" id="chat-message" placeholder="Type your message..." />
       <button onclick="sendMessage()">Send</button>
     </div>
   </div>
@@ -37,6 +46,9 @@
     const videoPlayer = document.getElementById('video-player');
     const messages = document.getElementById('messages');
     const chatMessage = document.getElementById('chat-message');
+    const usernameInput = document.getElementById('username');
+
+    let username = "Anonymous"; // Default username
 
     // Connect to the backend using Socket.io
     const socket = io('https://YOUR-RENDER-BACKEND-URL'); // Replace with your Render backend URL
@@ -69,14 +81,22 @@
     // Chat functionality
     socket.on('message', (msg) => {
       const messageElement = document.createElement('div');
-      messageElement.textContent = msg;
+      const usernameElement = document.createElement('strong');
+      usernameElement.textContent = msg.username; // Display the sender's username
+      messageElement.appendChild(usernameElement);
+      messageElement.appendChild(document.createTextNode(`: ${msg.message}`));
       messages.appendChild(messageElement);
     });
 
     function sendMessage() {
       const message = chatMessage.value;
-      socket.emit('message', message);
+      socket.emit('message', { username, message }); // Send the username along with the message
       chatMessage.value = '';
+    }
+
+    function changeUsername() {
+      username = usernameInput.value.trim() || "Anonymous"; // Set username or use "Anonymous" if empty
+      alert(`Username changed to: ${username}`);
     }
   </script>
 </body>
