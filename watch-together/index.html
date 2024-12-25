@@ -11,15 +11,16 @@
       background-color: #121212;
       color: white;
       display: flex;
+      flex-direction: column; /* Stack elements vertically */
       height: 100vh;
     }
 
     #video-container {
-      flex: 1; /* Occupy 50% width */
-      background-color: #000;
+      flex: 1; /* Take up 50% height */
       display: flex;
       justify-content: center;
       align-items: center;
+      background-color: #000;
     }
 
     iframe {
@@ -29,10 +30,10 @@
     }
 
     #chat-container {
-      flex: 1; /* Occupy 50% width */
+      flex: 1; /* Take up remaining 50% height */
       background-color: #1e1e1e;
       display: flex;
-      flex-direction: column;
+      flex-direction: column; /* Stack input and messages vertically */
       padding: 10px;
     }
 
@@ -45,7 +46,7 @@
       background-color: #121212;
       border-radius: 5px;
       display: flex;
-      flex-direction: column; /* Display messages vertically */
+      flex-direction: column; /* Keep messages stacked vertically */
     }
 
     .chat-message {
@@ -105,7 +106,7 @@
 
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <script>
-    const socket = io("https://wistful-magical-arthropod.glitch.me/"); // Replaced with your Glitch URL
+    const socket = io("https://wistful-magical-arthropod.glitch.me/"); // Replace with your Glitch URL
 
     const chatBox = document.getElementById("chat-box");
     const messageInput = document.getElementById("message");
