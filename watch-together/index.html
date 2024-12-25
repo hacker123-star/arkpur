@@ -11,12 +11,12 @@
       background-color: #121212;
       color: white;
       display: flex;
-      flex-direction: column; /* Stack elements vertically */
+      flex-direction: column;
       height: 100vh;
     }
 
     #video-container {
-      flex: 1; /* Take up 50% height */
+      flex: 1;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -30,10 +30,10 @@
     }
 
     #chat-container {
-      flex: 1; /* Take up remaining 50% height */
+      flex: 1;
       background-color: #1e1e1e;
       display: flex;
-      flex-direction: column; /* Stack input and messages vertically */
+      flex-direction: column;
       padding: 10px;
     }
 
@@ -46,7 +46,7 @@
       background-color: #121212;
       border-radius: 5px;
       display: flex;
-      flex-direction: column; /* Keep messages stacked vertically */
+      flex-direction: column;
     }
 
     .chat-message {
@@ -90,6 +90,19 @@
     #chat-input button:hover {
       background-color: #0056b3;
     }
+
+    #change-username-button {
+      background-color: #28a745;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    #change-username-button:hover {
+      background-color: #218838;
+    }
   </style>
 </head>
 <body>
@@ -102,6 +115,7 @@
       <input type="text" id="message" placeholder="Type a message...">
       <button id="send">Send</button>
     </div>
+    <button id="change-username-button">Change Username</button>
   </div>
 
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
@@ -111,15 +125,16 @@
     const chatBox = document.getElementById("chat-box");
     const messageInput = document.getElementById("message");
     const sendButton = document.getElementById("send");
+    const changeUsernameButton = document.getElementById("change-username-button");
 
-    // Username handling
+    // Retrieve username from localStorage or prompt the user to enter one
     let username = localStorage.getItem("username") || prompt("Enter your username:");
     if (!username) {
       username = `User${Math.floor(Math.random() * 1000)}`;
       localStorage.setItem("username", username);
     }
 
-    // Append messages to the chat box
+    // Function to append messages to the chat box
     function appendMessage(username, message, color) {
       const chatMessage = document.createElement("div");
       chatMessage.className = "chat-message";
@@ -146,6 +161,16 @@
     // Load previous messages when a user joins
     socket.on("loadMessages", (messages) => {
       messages.forEach((msg) => appendMessage(msg.username, msg.message, msg.color));
+    });
+
+    // Change username functionality
+    changeUsernameButton.addEventListener("click", () => {
+      const newUsername = prompt("Enter a new username:");
+      if (newUsername) {
+        username = newUsername;
+        localStorage.setItem("username", username); // Save the new username in localStorage
+        alert("Username changed successfully!");
+      }
     });
   </script>
 </body>
