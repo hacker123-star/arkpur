@@ -11,17 +11,14 @@
       background-color: #121212;
       color: white;
       display: flex;
+      flex-direction: column; /* Set the layout to vertical */
       height: 100vh;
     }
 
-    #video-container, #chat-container {
-      width: 50%;
-      display: flex;
-      flex-direction: column;
-    }
-
     #video-container {
+      flex: 1; /* Occupy 50% height */
       background-color: #000;
+      display: flex;
       justify-content: center;
       align-items: center;
     }
@@ -33,7 +30,10 @@
     }
 
     #chat-container {
+      flex: 1; /* Occupy 50% height */
       background-color: #1e1e1e;
+      display: flex;
+      flex-direction: column;
       padding: 10px;
     }
 
@@ -104,7 +104,7 @@
 
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <script>
-    const socket = io("https://wistful-magical-arthropod.glitch.me/"); // Replace with your server URL
+    const socket = io("https://wistful-magical-arthropod.glitch.me"); // Replace with your server URL
 
     const chatBox = document.getElementById("chat-box");
     const messageInput = document.getElementById("message");
