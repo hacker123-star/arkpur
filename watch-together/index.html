@@ -38,9 +38,10 @@
     }
 
     #chat-box {
-      flex: 1;
+      display: flex; /* Changed to flex for horizontal alignment */
+      flex-wrap: wrap; /* Allow messages to wrap to the next row if needed */
       overflow-y: auto;
-      margin-bottom: 10px;
+      height: 100%;
       border: 1px solid #333;
       padding: 10px;
       background-color: #121212;
@@ -48,7 +49,7 @@
     }
 
     .chat-message {
-      margin-bottom: 8px;
+      margin: 5px;
       padding: 5px 10px;
       border-radius: 5px;
       display: inline-block;
@@ -64,6 +65,7 @@
 
     #chat-input {
       display: flex;
+      margin-top: 10px;
     }
 
     #chat-input input[type="text"] {
