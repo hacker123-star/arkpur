@@ -107,7 +107,9 @@
 </head>
 <body>
   <div id="video-container">
-    <iframe src="https://drive.google.com/file/d/1buCwcg6BE2izDqleL894mlr0_APnWEDC/preview" allowfullscreen></iframe>
+  <video id="video" controls>
+  <source src="https://drive.google.com/uc?export=download&id=1KO8rfrxFHPZUtcV7TYPwWX2XYNkT2UgL" type="video/mp4" />
+</video>
   </div>
   <div id="chat-container">
     <div id="chat-box"></div>
@@ -183,6 +185,30 @@
       localStorage.setItem("username", username); // Save the new username in localStorage
       alert("Username changed successfully!");
     }
+  });
+</script>
+<script>
+  const video = document.getElementById("video");
+  let syncing = false;
+  
+  video.addEventListener("play", () => {
+    if (!syncing) socket.emit("video-event", { type: "play", time: video.currentTime });
+  });
+  
+  video.addEventListener("pause", () => {
+    if (!syncing) socket.emit("video-event", { type: "pause", time: video.currentTime });
+  });
+  
+  video.addEventListener("seeked", () => {
+    if (!syncing) socket.emit("video-event", { type: "seek", time: video.currentTime });
+  });
+  
+  socket.on("video-event", (data) => {
+    syncing = true;
+    video.currentTime = data.time;
+    if (data.type === "play") video.play();
+    if (data.type === "pause") video.pause();
+    syncing = false;
   });
 </script>
 </body>
