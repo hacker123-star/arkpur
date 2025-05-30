@@ -1,215 +1,185 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Watch Together</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+  <meta charset="UTF-8">  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+  <title>Watch Together</title>  
+  <style>  
+    body {  
+      margin: 0;  
+      font-family: Arial, sans-serif;  
+      background-color: #121212;  
+      color: white;  
+      display: flex;  
+      flex-direction: column;  
+      height: 100vh;  
+    }  #video-container {  
+  height: 60%; /* Fixed height for the video container */  
+  display: flex;  
+  justify-content: center;  
+  align-items: center;  
+  background-color: #000;  
+}  
 
-    #video-container {
-      height: 60%; /* Fixed height for the video container */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: #000;
-    }
+iframe {  
+  width: 100%;  
+  height: 100%;  
+  border: none;  
+}  
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
+#chat-container {  
+  height: 40%; /* Fixed height for the chat container */  
+  background-color: #1e1e1e;  
+  display: flex;  
+  flex-direction: column;  
+  padding: 10px;  
+}  
 
-    #chat-container {
-      height: 40%; /* Fixed height for the chat container */
-      background-color: #1e1e1e;
-      display: flex;
-      flex-direction: column;
-      padding: 10px;
-    }
+#chat-box {  
+  flex: 1;  
+  overflow-y: auto;  
+  margin-bottom: 10px;  
+  border: 1px solid #333;  
+  padding: 10px;  
+  background-color: #121212;  
+  border-radius: 5px;  
+  display: flex;  
+  flex-direction: column;  
+}  
 
-    #chat-box {
-      flex: 1;
-      overflow-y: auto;
-      margin-bottom: 10px;
-      border: 1px solid #333;
-      padding: 10px;
-      background-color: #121212;
-      border-radius: 5px;
-      display: flex;
-      flex-direction: column;
-    }
+.chat-message {  
+  margin-bottom: 8px;  
+  padding: 5px 10px;  
+  border-radius: 5px;  
+  display: inline-block;  
+}  
 
-    .chat-message {
-      margin-bottom: 8px;
-      padding: 5px 10px;
-      border-radius: 5px;
-      display: inline-block;
-    }
+.chat-message:nth-child(odd) {  
+  background-color: #333;  
+}  
 
-    .chat-message:nth-child(odd) {
-      background-color: #333;
-    }
+.chat-message:nth-child(even) {  
+  background-color: #444;  
+}  
 
-    .chat-message:nth-child(even) {
-      background-color: #444;
-    }
+#chat-input {  
+  display: flex;  
+}  
 
-    #chat-input {
-      display: flex;
-    }
+#chat-input input[type="text"] {  
+  flex: 1;  
+  padding: 10px;  
+  border: none;  
+  border-radius: 5px;  
+  margin-right: 10px;  
+  background-color: #222;  
+  color: white;  
+}  
 
-    #chat-input input[type="text"] {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      margin-right: 10px;
-      background-color: #222;
-      color: white;
-    }
+#chat-input button {  
+  padding: 10px 15px;  
+  border: none;  
+  border-radius: 5px;  
+  background-color: #007bff;  
+  color: white;  
+  cursor: pointer;  
+}  
 
-    #chat-input button {
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-    }
+#chat-input button:hover {  
+  background-color: #0056b3;  
+}  
 
-    #chat-input button:hover {
-      background-color: #0056b3;
-    }
+#change-username-button {  
+  background-color: #28a745;  
+  color: white;  
+  padding: 8px 16px;  
+  border-radius: 5px;  
+  cursor: pointer;  
+  margin-top: 10px;  
+}  
 
-    #change-username-button {
-      background-color: #28a745;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
+#change-username-button:hover {  
+  background-color: #218838;  
+}
 
-    #change-username-button:hover {
-      background-color: #218838;
-    }
-  </style>
-</head>
-<body>
-  <div id="video-container">
-  <video id="video" controls>
-  <source src="https://drive.google.com/file/d/1KO8rfrxFHPZUtcV7TYPwWX2XYNkT2UgL/preview" type="video/mp4" />
-</video>
-  </div>
-  <div id="chat-container">
-    <div id="chat-box"></div>
-    <div id="chat-input">
-      <input type="text" id="message" placeholder="Type a message...">
-      <button id="send">Send</button>
-    </div>
-    <button id="change-username-button">Change Username</button>
-  </div>
+  </style>  
+</head>  
+<body>  
+  <div id="video-container">  
+    <iframe src="https://drive.google.com/file/d/1KO8rfrxFHPZUtcV7TYPwWX2XYNkT2UgL/preview" allowfullscreen></iframe>  
+  </div>  
+  <div id="chat-container">  
+    <div id="chat-box"></div>  
+    <div id="chat-input">  
+      <input type="text" id="message" placeholder="Type a message...">  
+      <button id="send">Send</button>  
+    </div>  
+    <button id="change-username-button">Change Username</button>  
+  </div>  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 
-        <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-<script>
-  const socket = io("https://zigzag-bird-orchestra.glitch.me/"); // Replace with your Glitch URL
-
-  const chatBox = document.getElementById("chat-box");
-  const messageInput = document.getElementById("message");
-  const sendButton = document.getElementById("send");
-  const changeUsernameButton = document.getElementById("change-username-button");
-
-  // Retrieve username from localStorage or prompt the user to enter one
-  let username = localStorage.getItem("username") || prompt("Enter your username:");
-  if (!username) {
-    username = `User${Math.floor(Math.random() * 1000)}`;
-    localStorage.setItem("username", username);
-  }
-
-  // Function to append messages to the chat box
-  function appendMessage(username, message, color) {
-    const chatMessage = document.createElement("div");
-    chatMessage.className = "chat-message";
-    chatMessage.style.color = color || "#fff";
-    chatMessage.textContent = `${username}: ${message}`;
-    chatBox.appendChild(chatMessage);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-
-  // Send message
-  function sendMessage() {
-    const message = messageInput.value.trim();
-    if (message) {
-      socket.emit("chatMessage", { username, message });
-      messageInput.value = ""; // Clear input field but keep focus
-      messageInput.focus(); // Ensure the keyboard remains open
-    }
-  }
-
-  // Send message when the button is clicked
-  sendButton.addEventListener("click", sendMessage);
-
-  // Send message when "Enter" is pressed
-  messageInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault(); // Prevent default action (e.g., form submission)
-      sendMessage();
-    }
-  });
-
-  // Receive messages from server
-  socket.on("chatMessage", (data) => {
-    appendMessage(data.username, data.message, data.color);
-  });
-
-  // Load previous messages when a user joins
-  socket.on("loadMessages", (messages) => {
-    messages.forEach((msg) => appendMessage(msg.username, msg.message, msg.color));
-  });
-
-  // Change username functionality
-  changeUsernameButton.addEventListener("click", () => {
-    const newUsername = prompt("Enter a new username:");
-    if (newUsername) {
-      username = newUsername;
-      localStorage.setItem("username", username); // Save the new username in localStorage
-      alert("Username changed successfully!");
-    }
-  });
-</script>
-<script>
-  const video = document.getElementById("video");
-  let syncing = false;
+<script>  
+  const socket = io("https://zigzag-bird-orchestra.glitch.me/"); // Replace with your Glitch URL  
   
-  video.addEventListener("play", () => {
-    if (!syncing) socket.emit("video-event", { type: "play", time: video.currentTime });
-  });
+  const chatBox = document.getElementById("chat-box");  
+  const messageInput = document.getElementById("message");  
+  const sendButton = document.getElementById("send");  
+  const changeUsernameButton = document.getElementById("change-username-button");  
   
-  video.addEventListener("pause", () => {
-    if (!syncing) socket.emit("video-event", { type: "pause", time: video.currentTime });
-  });
+  // Retrieve username from localStorage or prompt the user to enter one  
+  let username = localStorage.getItem("username") || prompt("Enter your username:");  
+  if (!username) {  
+    username = `User${Math.floor(Math.random() * 1000)}`;  
+    localStorage.setItem("username", username);  
+  }  
   
-  video.addEventListener("seeked", () => {
-    if (!syncing) socket.emit("video-event", { type: "seek", time: video.currentTime });
-  });
+  // Function to append messages to the chat box  
+  function appendMessage(username, message, color) {  
+    const chatMessage = document.createElement("div");  
+    chatMessage.className = "chat-message";  
+    chatMessage.style.color = color || "#fff";  
+    chatMessage.textContent = `${username}: ${message}`;  
+    chatBox.appendChild(chatMessage);  
+    chatBox.scrollTop = chatBox.scrollHeight;  
+  }  
   
-  socket.on("video-event", (data) => {
-    syncing = true;
-    video.currentTime = data.time;
-    if (data.type === "play") video.play();
-    if (data.type === "pause") video.pause();
-    syncing = false;
-  });
-</script>
-</body>
-</html>
+  // Send message  
+  function sendMessage() {  
+    const message = messageInput.value.trim();  
+    if (message) {  
+      socket.emit("chatMessage", { username, message });  
+      messageInput.value = ""; // Clear input field but keep focus  
+      messageInput.focus(); // Ensure the keyboard remains open  
+    }  
+  }  
+  
+  // Send message when the button is clicked  
+  sendButton.addEventListener("click", sendMessage);  
+  
+  // Send message when "Enter" is pressed  
+  messageInput.addEventListener("keydown", (event) => {  
+    if (event.key === "Enter") {  
+      event.preventDefault(); // Prevent default action (e.g., form submission)  
+      sendMessage();  
+    }  
+  });  
+  
+  // Receive messages from server  
+  socket.on("chatMessage", (data) => {  
+    appendMessage(data.username, data.message, data.color);  
+  });  
+  
+  // Load previous messages when a user joins  
+  socket.on("loadMessages", (messages) => {  
+    messages.forEach((msg) => appendMessage(msg.username, msg.message, msg.color));  
+  });  
+  
+  // Change username functionality  
+  changeUsernameButton.addEventListener("click", () => {  
+    const newUsername = prompt("Enter a new username:");  
+    if (newUsername) {  
+      username = newUsername;  
+      localStorage.setItem("username", username); // Save the new username in localStorage  
+      alert("Username changed successfully!");  
+    }  
+  });  
+</script>  </body>  
+  </html>
