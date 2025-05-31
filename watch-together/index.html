@@ -57,13 +57,29 @@
       flex-direction: column;
     }
 
-    .chat-message {
-      margin-bottom: 8px;
-      padding: 5px 10px;
-      border-radius: 5px;
-      display: inline-block;
-      background-color: #333;
-    }
+.chat-message {
+  max-width: 70%;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: inline-block;
+  word-wrap: break-word;
+  clear: both;
+}
+
+.chat-message.user {
+  background-color: #25D366;
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 0;
+}
+
+.chat-message.other {
+  background-color: #333;
+  color: white;
+  align-self: flex-start;
+  border-bottom-left-radius: 0;
+      }
 
     #chat-input {
       display: flex;
