@@ -67,15 +67,17 @@
     }
 
     .reply-box {
-      background: #1f1f1f;
-      padding: 4px 8px;
-      border-left: 4px solid limegreen;
+      background: #262626;
+      padding: 6px 10px;
+      border-left: 4px solid #25d366;
       font-size: 0.9em;
       margin-bottom: 4px;
+      font-style: italic;
+      color: #ddd;
     }
 
     .replied-to {
-      color: limegreen;
+      color: #25d366;
     }
 
     #chat-input {
@@ -112,19 +114,25 @@
       cursor: pointer;
     }
 
-    .quoted {
-      font-size: 0.85em;
-      opacity: 0.9;
-    }
-
     .message:hover {
       cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      #chat-input {
+        flex-direction: column;
+      }
+
+      #chat-input button {
+        margin-left: 0;
+        margin-top: 5px;
+      }
     }
   </style>
 </head>
 <body>
   <div id="video-container">
-    <iframe src="https://drive.google.com/file/d/1FwRD1AxYs9SChm_DoG-Y8bKXFs6zoYmR/preview" allowfullscreen></iframe>
+    <iframe src="https://drive.google.com/file/d/1KO8rfrxFHPZUtcV7TYPwWX2XYNkT2UgL/preview" allowfullscreen></iframe>
   </div>
   <div id="chat-container">
     <div id="chat-box"></div>
@@ -137,7 +145,7 @@
 
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <script>
-    const socket = io("https://zigzag-bird-orchestra.glitch.me/"); // Replace with your server
+    const socket = io("https://zigzag-bird-orchestra.glitch.me/");
     const chatBox = document.getElementById("chat-box");
     const messageInput = document.getElementById("message");
     const sendButton = document.getElementById("send");
@@ -145,6 +153,7 @@
 
     const userColors = {};
     let replyTo = null;
+    let username = localStorage.getItem("username") || prompt("Enter a username:");
 
     function getColorForUsername(username) {
       if (!userColors[username]) {
@@ -154,14 +163,22 @@
       return userColors[username];
     }
 
-    let username = localStorage.getItem("username") || prompt("Enter a username:");
-    socket.emit("checkUsername", username);
+    function requestUsername(u) {
+      socket.emit("checkUsername", u);
+    }
+
+    requestUsername(username);
 
     socket.on("usernameExists", () => {
       alert("Username already taken! Enter a different one.");
       username = prompt("New username:");
+      requestUsername(username);
+    });
+
+    socket.on("usernameAvailable", (newUsername) => {
+      username = newUsername;
       localStorage.setItem("username", username);
-      socket.emit("checkUsername", username);
+      alert("Username changed successfully!");
     });
 
     localStorage.setItem("username", username);
@@ -171,6 +188,7 @@
       if (!message) return;
       socket.emit("chatMessage", { username, message, replyTo });
       messageInput.value = "";
+      messageInput.placeholder = "Type a message...";
       replyTo = null;
     };
 
@@ -178,6 +196,7 @@
       const msgDiv = document.createElement("div");
       msgDiv.classList.add("message");
       msgDiv.classList.add(isOwn ? "own" : "other");
+
       msgDiv.onclick = () => {
         replyTo = data;
         messageInput.placeholder = `Replying to ${data.username}: ${data.message}`;
@@ -214,15 +233,20 @@
       messages.forEach((m) => appendMessage(m, m.username === username));
     });
 
+    socket.on("systemMessage", (msg) => {
+      const sysMsg = document.createElement("div");
+      sysMsg.textContent = msg;
+      sysMsg.style.textAlign = "center";
+      sysMsg.style.fontSize = "0.85em";
+      sysMsg.style.color = "#888";
+      chatBox.appendChild(sysMsg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
     changeUsernameButton.onclick = () => {
       const newUsername = prompt("Enter a new username:");
       if (newUsername && newUsername !== username) {
-        socket.emit("checkUsername", newUsername);
-        socket.on("usernameAvailable", () => {
-          username = newUsername;
-          localStorage.setItem("username", username);
-          alert("Username changed successfully!");
-        });
+        requestUsername(newUsername);
       }
     };
   </script>
