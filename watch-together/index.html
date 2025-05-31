@@ -2,34 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Watch Together</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watch Together Chat</title>
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #121212;
+      background-color: #0d0d0d;
       color: white;
       height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
     }
 
     #video-container {
-      height: 40%;
-      width: 100%;
+      height: 60%;
+      background: black;
     }
 
     iframe {
       width: 100%;
       height: 100%;
-      border: none;
     }
 
     #chat-container {
-      height: 60%;
-      background-color: #1e1e1e;
+      height: 40%;
+      background: #1a1a1a;
       display: flex;
       flex-direction: column;
       padding: 10px;
@@ -38,83 +36,89 @@
     #chat-box {
       flex: 1;
       overflow-y: auto;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      padding-right: 10px;
     }
 
-    .chat-message {
-      max-width: 70%;
+    .message {
+      max-width: 80%;
+      margin: 8px;
       padding: 8px 12px;
       border-radius: 8px;
-      position: relative;
       word-wrap: break-word;
+      position: relative;
     }
 
-    .own-message {
-      align-self: flex-end;
-      background-color: #25D366;
-      color: black;
+    .own {
+      background-color: #075e54;
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 0;
     }
 
-    .other-message {
-      align-self: flex-start;
+    .other {
       background-color: #2a2a2a;
       color: white;
+      border-bottom-left-radius: 0;
     }
 
-    .username-label {
+    .name {
       font-weight: bold;
-      font-size: 0.9em;
       margin-bottom: 2px;
     }
 
-    .reply-preview {
-      font-size: 0.8em;
-      padding: 4px;
-      border-left: 3px solid #888;
+    .reply-box {
+      background: #1f1f1f;
+      padding: 4px 8px;
+      border-left: 4px solid limegreen;
+      font-size: 0.9em;
       margin-bottom: 4px;
-      opacity: 0.8;
     }
 
-    .notification {
-      align-self: center;
-      color: #aaa;
-      font-size: 0.9em;
+    .replied-to {
+      color: limegreen;
     }
 
     #chat-input {
       display: flex;
-      gap: 10px;
-      margin-top: 10px;
+      margin-top: 5px;
     }
 
     #chat-input input {
       flex: 1;
       padding: 10px;
+      border-radius: 4px;
       border: none;
-      border-radius: 5px;
-      background-color: #333;
+      outline: none;
+      background-color: #2a2a2a;
       color: white;
     }
 
     #chat-input button {
-      padding: 10px 15px;
+      background-color: #25d366;
       border: none;
-      border-radius: 5px;
-      background-color: #007bff;
-      color: white;
+      padding: 10px 16px;
+      border-radius: 4px;
+      margin-left: 5px;
       cursor: pointer;
     }
 
-    #reply-box {
-      background-color: #222;
-      padding: 6px;
-      margin-bottom: 6px;
-      border-left: 4px solid #25D366;
-      font-size: 0.8em;
-      display: none;
+    #change-username-button {
+      margin-top: 5px;
+      background-color: #007bff;
+      border: none;
+      padding: 8px;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .quoted {
+      font-size: 0.85em;
+      opacity: 0.9;
+    }
+
+    .message:hover {
+      cursor: pointer;
     }
   </style>
 </head>
@@ -122,135 +126,105 @@
   <div id="video-container">
     <iframe src="https://drive.google.com/file/d/1FwRD1AxYs9SChm_DoG-Y8bKXFs6zoYmR/preview" allowfullscreen></iframe>
   </div>
-
   <div id="chat-container">
     <div id="chat-box"></div>
-
-    <div id="reply-box"></div>
-
     <div id="chat-input">
-      <input type="text" id="message" placeholder="Type a message...">
+      <input type="text" id="message" placeholder="Type a message..." />
       <button id="send">Send</button>
     </div>
+    <button id="change-username-button">Change Username</button>
   </div>
 
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <script>
-    const socket = io("https://zigzag-bird-orchestra.glitch.me/");
-
+    const socket = io("https://zigzag-bird-orchestra.glitch.me/"); // Replace with your server
     const chatBox = document.getElementById("chat-box");
     const messageInput = document.getElementById("message");
-    const sendBtn = document.getElementById("send");
-    const replyBox = document.getElementById("reply-box");
+    const sendButton = document.getElementById("send");
+    const changeUsernameButton = document.getElementById("change-username-button");
 
-    let username = localStorage.getItem("username") || "";
-    let replyTo = null;
     const userColors = {};
+    let replyTo = null;
 
-    function pickColor(name) {
-      if (!userColors[name]) {
-        const colors = ["#e91e63", "#ff5722", "#ff9800", "#9c27b0", "#03a9f4", "#4caf50", "#ffc107"];
-        userColors[name] = colors[Math.floor(Math.random() * colors.length)];
+    function getColorForUsername(username) {
+      if (!userColors[username]) {
+        const hue = Math.floor(Math.random() * 360);
+        userColors[username] = `hsl(${hue}, 70%, 60%)`;
       }
-      return userColors[name];
+      return userColors[username];
     }
 
-    function promptUsername() {
-      let name;
-      do {
-        name = prompt("Enter your username:");
-        if (!name) name = "User" + Math.floor(Math.random() * 1000);
-        socket.emit("join", name, (res) => {
-          if (res.success) {
-            username = name;
-            localStorage.setItem("username", username);
-          } else {
-            alert(res.message);
-            promptUsername();
-          }
-        });
-      } while (!username);
-    }
+    let username = localStorage.getItem("username") || prompt("Enter a username:");
+    socket.emit("checkUsername", username);
 
-    if (!username) {
-      promptUsername();
-    } else {
-      socket.emit("join", username, (res) => {
-        if (!res.success) {
-          promptUsername();
-        }
-      });
-    }
+    socket.on("usernameExists", () => {
+      alert("Username already taken! Enter a different one.");
+      username = prompt("New username:");
+      localStorage.setItem("username", username);
+      socket.emit("checkUsername", username);
+    });
 
-    function appendMessage({ id, username: sender, message, replyTo }) {
+    localStorage.setItem("username", username);
+
+    sendButton.onclick = () => {
+      const message = messageInput.value.trim();
+      if (!message) return;
+      socket.emit("chatMessage", { username, message, replyTo });
+      messageInput.value = "";
+      replyTo = null;
+    };
+
+    function appendMessage(data, isOwn) {
       const msgDiv = document.createElement("div");
-      msgDiv.classList.add("chat-message");
-
-      const isOwn = sender === username;
-      msgDiv.classList.add(isOwn ? "own-message" : "other-message");
+      msgDiv.classList.add("message");
+      msgDiv.classList.add(isOwn ? "own" : "other");
+      msgDiv.onclick = () => {
+        replyTo = data;
+        messageInput.placeholder = `Replying to ${data.username}: ${data.message}`;
+      };
 
       if (!isOwn) {
-        const label = document.createElement("div");
-        label.className = "username-label";
-        label.style.color = pickColor(sender);
-        label.textContent = sender;
-        msgDiv.appendChild(label);
+        const name = document.createElement("div");
+        name.className = "name";
+        name.textContent = data.username;
+        name.style.color = getColorForUsername(data.username);
+        msgDiv.appendChild(name);
       }
 
-      if (replyTo) {
-        const preview = document.createElement("div");
-        preview.className = "reply-preview";
-        preview.innerText = `${replyTo.username}: ${replyTo.message}`;
-        msgDiv.appendChild(preview);
+      if (data.replyTo) {
+        const replyBox = document.createElement("div");
+        replyBox.className = "reply-box";
+        replyBox.innerHTML = `<span class='replied-to'>${data.replyTo.username}:</span> ${data.replyTo.message}`;
+        msgDiv.appendChild(replyBox);
       }
 
-      const content = document.createElement("div");
-      content.textContent = message;
-      msgDiv.appendChild(content);
-
-      // Slide to reply (touch and desktop)
-      let startX;
-      msgDiv.addEventListener("mousedown", (e) => startX = e.clientX);
-      msgDiv.addEventListener("mouseup", (e) => {
-        if (e.clientX - startX > 100) {
-          replyTo = { username: sender, message };
-          replyBox.style.display = "block";
-          replyBox.innerText = `Replying to ${replyTo.username}: ${replyTo.message}`;
-        }
-      });
+      const text = document.createElement("div");
+      text.textContent = data.message;
+      msgDiv.appendChild(text);
 
       chatBox.appendChild(msgDiv);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    sendBtn.addEventListener("click", () => {
-      const message = messageInput.value.trim();
-      if (message) {
-        socket.emit("chatMessage", {
-          username,
-          message,
-          replyTo
+    socket.on("chatMessage", (data) => {
+      appendMessage(data, data.username === username);
+    });
+
+    socket.on("loadMessages", (messages) => {
+      messages.forEach((m) => appendMessage(m, m.username === username));
+    });
+
+    changeUsernameButton.onclick = () => {
+      const newUsername = prompt("Enter a new username:");
+      if (newUsername && newUsername !== username) {
+        socket.emit("checkUsername", newUsername);
+        socket.on("usernameAvailable", () => {
+          username = newUsername;
+          localStorage.setItem("username", username);
+          alert("Username changed successfully!");
         });
-        messageInput.value = "";
-        replyTo = null;
-        replyBox.style.display = "none";
       }
-    });
-
-    socket.on("chatMessage", appendMessage);
-
-    socket.on("loadMessages", (msgs) => {
-      chatBox.innerHTML = "";
-      msgs.forEach(appendMessage);
-    });
-
-    socket.on("notification", (text) => {
-      const notif = document.createElement("div");
-      notif.className = "notification";
-      notif.textContent = text;
-      chatBox.appendChild(notif);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    });
+    };
   </script>
 </body>
 </html>
