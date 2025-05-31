@@ -8,8 +8,8 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: white;
+      background-color: white;
+      color: black;
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -38,7 +38,7 @@
       left: 0;
       width: 100%;
       height: 40%;
-      background-color: #1e1e1e;
+      background-color: #f2f2f2;
       display: flex;
       flex-direction: column;
       padding: 10px;
@@ -49,57 +49,58 @@
       flex: 1;
       overflow-y: auto;
       margin-bottom: 10px;
-      border: 1px solid #333;
+      border: 1px solid #ccc;
       padding: 10px;
-      background-color: #121212;
+      background-color: #ffffff;
       border-radius: 5px;
       display: flex;
       flex-direction: column;
+      align-items: stretch;
     }
 
+    .chat-message {
+      max-width: 70%;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      word-wrap: break-word;
+      display: inline-block;
+      clear: both;
+    }
 
+    .chat-message.user {
+      background-color: #25D366;
+      color: white;
+      float: right;
+      border-bottom-right-radius: 0;
+      text-align: right;
+    }
+
+    .chat-message.other {
+      background-color: #eaeaea;
+      color: black;
+      float: left;
+      border-bottom-left-radius: 0;
+    }
+
+    .chat-username {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
 
     #chat-input {
-      display.chat-message {
-  max-width: 70%;
-  margin-bottom: 12px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  word-wrap: break-word;
-  clear: both;
-}
-
-.chat-message.user {
-  align-self: flex-end;
-  background-color: #25D366;
-  color: white;
-  border-bottom-right-radius: 0;
-}
-
-.chat-message.other {
-  align-self: flex-start;
-  background-color: #333;
-  color: white;
-  border-bottom-left-radius: 0;
-}
-
-.chat-username {
-  font-size: 12px;
-  font-weight: bold;
-  margin-bottom: 3px;
-  }: flex;
+      display: flex;
     }
 
     #chat-input input[type="text"] {
       flex: 1;
       padding: 10px;
-      border: none;
+      border: 1px solid #ccc;
       border-radius: 5px;
       margin-right: 10px;
-      background-color: #222;
-      color: white;
+      background-color: #fff;
+      color: black;
     }
 
     #chat-input button {
@@ -122,6 +123,7 @@
       border-radius: 5px;
       cursor: pointer;
       margin-top: 10px;
+      border: none;
     }
 
     #change-username-button:hover {
@@ -152,80 +154,51 @@
     const sendButton = document.getElementById("send");
     const changeUsernameButton = document.getElementById("change-username-button");
 
-    let username = localStorage.getItem("username");
-
-    function askUsername() {
-      username = prompt("Enter your username:");
-      if (!username) {
-        username = `User${Math.floor(Math.random() * 1000)}`;
-      }
-      localStorage.setItem("username", username);
-      socket.emit("setUsername", username);
-    }
-
-    // Try setting username on first load
+    let username = localStorage.getItem("username") || prompt("Enter your username:");
     if (!username) {
-      askUsername();
-    } else {
-      socket.emit("setUsername", username);
+      username = `User${Math.floor(Math.random() * 1000)}`;
+    }
+    localStorage.setItem("username", username);
+
+    // Utility to get consistent username color
+    function getUsernameColor(name) {
+      const colors = [
+        "#e6194b", "#3cb44b", "#ffe119", "#4363d8",
+        "#f58231", "#911eb4", "#46f0f0", "#f032e6",
+        "#bcf60c", "#fabebe", "#008080", "#e6beff",
+        "#9a6324", "#fffac8", "#800000", "#aaffc3"
+      ];
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return colors[Math.abs(hash) % colors.length];
     }
 
-    socket.on("usernameExists", () => {
-      alert("Username already exists! Please choose another.");
-      askUsername();
-    });
+    function appendMessage(sender, message) {
+      const messageWrapper = document.createElement("div");
+      const messageText = document.createElement("div");
 
-    socket.on("usernameAccepted", () => {
-      console.log("Username accepted:", username);
-    });
+      if (sender === username) {
+        messageWrapper.className = "chat-message user";
+        messageText.textContent = message;
+        messageWrapper.appendChild(messageText);
+      } else {
+        messageWrapper.className = "chat-message other";
 
-    // Function to get consistent color per username
-function getUsernameColor(name) {
-  const colors = [
-    "#e6194b", "#3cb44b", "#ffe119", "#4363d8",
-    "#f58231", "#911eb4", "#46f0f0", "#f032e6",
-    "#bcf60c", "#fabebe", "#008080", "#e6beff",
-    "#9a6324", "#fffac8", "#800000", "#aaffc3"
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-}
+        const nameDiv = document.createElement("div");
+        nameDiv.className = "chat-username";
+        nameDiv.textContent = sender;
+        nameDiv.style.color = getUsernameColor(sender);
 
-function appendMessage(sender, message) {
-  const chatMessage = document.createElement("div");
-  const messageText = document.createElement("div");
+        messageText.textContent = message;
 
-  if (sender === username) {
-    chatMessage.className = "chat-message user";
-    messageText.textContent = message;
-    chatMessage.appendChild(messageText);
-  } else if (sender === "System") {
-    chatMessage.style.textAlign = "center";
-    chatMessage.style.color = "#888";
-    chatMessage.textContent = message;
-  } else {
-    chatMessage.className = "chat-message other";
+        messageWrapper.appendChild(nameDiv);
+        messageWrapper.appendChild(messageText);
+      }
 
-    const usernameDiv = document.createElement("div");
-    usernameDiv.className = "chat-username";
-    usernameDiv.textContent = sender;
-    usernameDiv.style.color = getUsernameColor(sender);
-
-    messageText.textContent = message;
-
-    chatMessage.appendChild(usernameDiv);
-    chatMessage.appendChild(messageText);
-  }
-
-  chatBox.appendChild(chatMessage);
-  chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-  chatBox.appendChild(chatMessage);
-  chatBox.scrollTop = chatBox.scrollHeight;
+      chatBox.appendChild(messageWrapper);
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
 
     sendButton.addEventListener("click", () => {
@@ -241,20 +214,17 @@ function appendMessage(sender, message) {
     });
 
     socket.on("loadMessages", (messages) => {
-      messages.forEach((msg) => appendMessage(msg.username, msg.message));
+      messages.forEach(msg => appendMessage(msg.username, msg.message));
     });
-    // Join/Leave notifications
-socket.on("userJoined", (name) => {
-  appendMessage("System", `${name} joined the chat`);
-});
-
-socket.on("userLeft", (name) => {
-  appendMessage("System", `${name} left the chat`);
-});
 
     changeUsernameButton.addEventListener("click", () => {
-      askUsername();
+      const newUsername = prompt("Enter a new username:");
+      if (newUsername) {
+        username = newUsername;
+        localStorage.setItem("username", username);
+        alert("Username changed successfully!");
+      }
     });
   </script>
 </body>
-      </html>
+  </html>
