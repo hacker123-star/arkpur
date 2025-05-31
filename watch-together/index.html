@@ -180,6 +180,14 @@
     socket.on("loadMessages", (messages) => {
       messages.forEach((msg) => appendMessage(msg.username, msg.message));
     });
+    // Join/Leave notifications
+socket.on("userJoined", (name) => {
+  appendMessage("System", `${name} joined the chat`);
+});
+
+socket.on("userLeft", (name) => {
+  appendMessage("System", `${name} left the chat`);
+});
 
     changeUsernameButton.addEventListener("click", () => {
       askUsername();
