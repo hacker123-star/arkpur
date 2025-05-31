@@ -1,224 +1,270 @@
-<!DOCTYPE html>  <html lang="en">  
-<head>  
-  <meta charset="UTF-8" />  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  
-  <title>Watch Together Chat</title>  
-  <style>  
-    body {  
-      margin: 0;  
-      font-family: Arial, sans-serif;  
-      background-color: #0d0d0d;  
-      color: white;  
-      height: 100vh;  
-      display: flex;  
-      flex-direction: column;  
-    }  #video-container {  
-  height: 60%;  
-  background: black;  
-}  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watch Together Chat</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #0d0d0d;
+      color: white;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-iframe {  
-  width: 100%;  
-  height: 100%;  
-}  
+    #video-container {
+      height: 60%;
+      background: black;
+    }
 
-#chat-container {  
-  height: 40%;  
-  background: #1a1a1a;  
-  display: flex;  
-  flex-direction: column;  
-  padding: 10px;  
-}  
+    iframe {
+      width: 100%;
+      height: 100%;
+    }
 
-#chat-box {  
-  flex: 1;  
-  overflow-y: auto;  
-  padding-right: 10px;  
-}  
+    #chat-container {
+      height: 40%;
+      background: #1a1a1a;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+    }
 
-.message {  
-  max-width: 80%;  
-  margin: 8px;  
-  padding: 8px 12px;  
-  border-radius: 8px;  
-  word-wrap: break-word;  
-  position: relative;  
-}  
+    #chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
 
-.own {  
-  background-color: #075e54;  
-  color: white;  
-  margin-left: auto;  
-  border-bottom-right-radius: 0;  
-}  
+    .message {
+      max-width: 80%;
+      margin: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      word-wrap: break-word;
+      position: relative;
+    }
 
-.other {  
-  background-color: #2a2a2a;  
-  color: white;  
-  border-bottom-left-radius: 0;  
-}  
+    .own {
+      background-color: #075e54;
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 0;
+    }
 
-.name {  
-  font-weight: bold;  
-  margin-bottom: 2px;  
-}  
+    .other {
+      background-color: #2a2a2a;
+      color: white;
+      border-bottom-left-radius: 0;
+    }
 
-.reply-box {  
-  background: #1f1f1f;  
-  padding: 4px 8px;  
-  border-left: 4px solid limegreen;  
-  font-size: 0.9em;  
-  margin-bottom: 4px;  
-}  
+    .name {
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
 
-.replied-to {  
-  color: limegreen;  
-}  
+    .reply-box {
+      background: #262626;
+      padding: 6px 10px;
+      border-left: 4px solid #25d366;
+      font-size: 0.9em;
+      margin-bottom: 4px;
+      font-style: italic;
+      color: #ddd;
+    }
 
-#chat-input {  
-  display: flex;  
-  margin-top: 5px;  
-}  
+    .replied-to {
+      color: #25d366;
+    }
 
-#chat-input input {  
-  flex: 1;  
-  padding: 10px;  
-  border-radius: 4px;  
-  border: none;  
-  outline: none;  
-  background-color: #2a2a2a;  
-  color: white;  
-}  
+    #chat-input {
+      display: flex;
+      margin-top: 5px;
+    }
 
-#chat-input button {  
-  background-color: #25d366;  
-  border: none;  
-  padding: 10px 16px;  
-  border-radius: 4px;  
-  margin-left: 5px;  
-  cursor: pointer;  
-}  
+    #chat-input input {
+      flex: 1;
+      padding: 8px;
+      border-radius: 4px;
+      border: none;
+      outline: none;
+      background-color: #2a2a2a;
+      color: white;
+      font-size: 14px;
+    }
 
-#change-username-button {  
-  margin-top: 5px;  
-  background-color: #007bff;  
-  border: none;  
-  padding: 8px;  
-  color: white;  
-  border-radius: 4px;  
-  cursor: pointer;  
-}  
+    #chat-input button {
+      background-color: #25d366;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      margin-left: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
 
-.quoted {  
-  font-size: 0.85em;  
-  opacity: 0.9;  
-}  
+    #change-username-button {
+      margin-top: 5px;
+      background-color: #007bff;
+      border: none;
+      padding: 6px 10px;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
 
-.message:hover {  
-  cursor: pointer;  
-}
+    .message:hover {
+      cursor: pointer;
+    }
 
-  </style>  
-</head>  
-<body>  
-  <div id="video-container">  
-    <iframe src="https://drive.google.com/file/d/1KO8rfrxFHPZUtcV7TYPwWX2XYNkT2UgL/preview" allowfullscreen></iframe>  
-  </div>  
-  <div id="chat-container">  
-    <div id="chat-box"></div>  
-    <div id="chat-input">  
-      <input type="text" id="message" placeholder="Type a message..." />  
-      <button id="send">Send</button>  
-    </div>  
-    <button id="change-username-button">Change Username</button>  
-  </div>    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>    <script>  
-    const socket = io("https://zigzag-bird-orchestra.glitch.me/"); // Replace with your server  
-    const chatBox = document.getElementById("chat-box");  
-    const messageInput = document.getElementById("message");  
-    const sendButton = document.getElementById("send");  
-    const changeUsernameButton = document.getElementById("change-username-button");  
-  
-    const userColors = {};  
-    let replyTo = null;  
-  
-    function getColorForUsername(username) {  
-      if (!userColors[username]) {  
-        const hue = Math.floor(Math.random() * 360);  
-        userColors[username] = `hsl(${hue}, 70%, 60%)`;  
-      }  
-      return userColors[username];  
-    }  
-  
-    let username = localStorage.getItem("username") || prompt("Enter a username:");  
-    socket.emit("checkUsername", username);  
-  
-    socket.on("usernameExists", () => {  
-      alert("Username already taken! Enter a different one.");  
-      username = prompt("New username:");  
-      localStorage.setItem("username", username);  
-      socket.emit("checkUsername", username);  
-    });  
-  
-    localStorage.setItem("username", username);  
-  
-    sendButton.onclick = () => {  
-      const message = messageInput.value.trim();  
-      if (!message) return;  
-      socket.emit("chatMessage", { username, message, replyTo });  
-      messageInput.value = "";  
-      replyTo = null;  
-    };  
-  
-    function appendMessage(data, isOwn) {  
-      const msgDiv = document.createElement("div");  
-      msgDiv.classList.add("message");  
-      msgDiv.classList.add(isOwn ? "own" : "other");  
-      msgDiv.onclick = () => {  
-        replyTo = data;  
-        messageInput.placeholder = `Replying to ${data.username}: ${data.message}`;  
-      };  
-  
-      if (!isOwn) {  
-        const name = document.createElement("div");  
-        name.className = "name";  
-        name.textContent = data.username;  
-        name.style.color = getColorForUsername(data.username);  
-        msgDiv.appendChild(name);  
-      }  
-  
-      if (data.replyTo) {  
-        const replyBox = document.createElement("div");  
-        replyBox.className = "reply-box";  
-        replyBox.innerHTML = `<span class='replied-to'>${data.replyTo.username}:</span> ${data.replyTo.message}`;  
-        msgDiv.appendChild(replyBox);  
-      }  
-  
-      const text = document.createElement("div");  
-      text.textContent = data.message;  
-      msgDiv.appendChild(text);  
-  
-      chatBox.appendChild(msgDiv);  
-      chatBox.scrollTop = chatBox.scrollHeight;  
-    }  
-  
-    socket.on("chatMessage", (data) => {  
-      appendMessage(data, data.username === username);  
-    });  
-  
-    socket.on("loadMessages", (messages) => {  
-      messages.forEach((m) => appendMessage(m, m.username === username));  
-    });  
-  
-    changeUsernameButton.onclick = () => {  
-      const newUsername = prompt("Enter a new username:");  
-      if (newUsername && newUsername !== username) {  
-        socket.emit("checkUsername", newUsername);  
-        socket.on("usernameAvailable", () => {  
-          username = newUsername;  
-          localStorage.setItem("username", username);  
-          alert("Username changed successfully!");  
-        });  
-      }  
-    };  
-  </script>  </body>  
-</html>  
+    @media (max-width: 600px) {
+      #chat-input {
+        flex-direction: column;
+      }
+
+      #chat-input button {
+        margin-left: 0;
+        margin-top: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="video-container">
+    <iframe src="https://drive.google.com/file/d/1KO8rfrxFHPZUtcV7TYPwWX2XYNkT2UgL/preview" allowfullscreen></iframe>
+  </div>
+  <div id="chat-container">
+    <div id="chat-box"></div>
+    <div id="chat-input">
+      <input type="text" id="message" placeholder="Type a message..." />
+      <button id="send">Send</button>
+    </div>
+    <button id="change-username-button">Change Username</button>
+  </div>
+
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <script>
+    const socket = io("https://zigzag-bird-orchestra.glitch.me/");
+    const chatBox = document.getElementById("chat-box");
+    const messageInput = document.getElementById("message");
+    const sendButton = document.getElementById("send");
+    const changeUsernameButton = document.getElementById("change-username-button");
+
+    const userColors = {};
+    let replyTo = null;
+    let username = localStorage.getItem("username");
+    let waitingForUsernameChange = false;
+
+    function getColorForUsername(name) {
+      if (!userColors[name]) {
+        const hue = Math.floor(Math.random() * 360);
+        userColors[name] = `hsl(${hue}, 70%, 60%)`;
+      }
+      return userColors[name];
+    }
+
+    function askUsername() {
+      username = prompt("Enter a username:");
+      if (username) {
+        socket.emit("checkUsername", username);
+      }
+    }
+
+    if (!username) {
+      askUsername();
+    } else {
+      socket.emit("checkUsername", username);
+    }
+
+    sendButton.onclick = () => {
+      const message = messageInput.value.trim();
+      if (!message) return;
+      socket.emit("chatMessage", { username, message, replyTo });
+      messageInput.value = "";
+      messageInput.placeholder = "Type a message...";
+      replyTo = null;
+    };
+
+    socket.on("usernameExists", () => {
+      if (waitingForUsernameChange) {
+        alert("Username already taken!");
+        waitingForUsernameChange = false;
+      } else {
+        alert("Username already taken. Please enter another:");
+        askUsername();
+      }
+    });
+
+    socket.on("usernameAvailable", (newUsername) => {
+      username = newUsername;
+      localStorage.setItem("username", username);
+      if (waitingForUsernameChange) {
+        alert("Username changed to: " + username);
+        waitingForUsernameChange = false;
+      }
+    });
+
+    changeUsernameButton.onclick = () => {
+      const newUsername = prompt("Enter new username:");
+      if (newUsername && newUsername !== username) {
+        waitingForUsernameChange = true;
+        socket.emit("checkUsername", newUsername);
+      }
+    };
+
+    function appendMessage(data, isOwn) {
+      const msgDiv = document.createElement("div");
+      msgDiv.classList.add("message", isOwn ? "own" : "other");
+
+      msgDiv.onclick = () => {
+        replyTo = data;
+        messageInput.placeholder = `Replying to ${data.username}: ${data.message}`;
+      };
+
+      if (!isOwn) {
+        const name = document.createElement("div");
+        name.className = "name";
+        name.textContent = data.username;
+        name.style.color = getColorForUsername(data.username);
+        msgDiv.appendChild(name);
+      }
+
+      if (data.replyTo) {
+        const replyBox = document.createElement("div");
+        replyBox.className = "reply-box";
+        replyBox.innerHTML = `<span class="replied-to">${data.replyTo.username}:</span> ${data.replyTo.message}`;
+        msgDiv.appendChild(replyBox);
+      }
+
+      const text = document.createElement("div");
+      text.textContent = data.message;
+      msgDiv.appendChild(text);
+
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    socket.on("chatMessage", (data) => {
+      appendMessage(data, data.username === username);
+    });
+
+    socket.on("loadMessages", (messages) => {
+      messages.forEach((m) => appendMessage(m, m.username === username));
+    });
+
+    socket.on("systemMessage", (msg) => {
+      const sysMsg = document.createElement("div");
+      sysMsg.textContent = msg;
+      sysMsg.style.textAlign = "center";
+      sysMsg.style.fontSize = "0.85em";
+      sysMsg.style.color = "#888";
+      chatBox.appendChild(sysMsg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+  </script>
+</body>
+</html>
