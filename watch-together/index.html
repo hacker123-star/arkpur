@@ -57,32 +57,39 @@
       flex-direction: column;
     }
 
-.chat-message {
+
+
+    #chat-input {
+      display.chat-message {
   max-width: 70%;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   padding: 8px 12px;
   border-radius: 8px;
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
   word-wrap: break-word;
   clear: both;
 }
 
 .chat-message.user {
+  align-self: flex-end;
   background-color: #25D366;
   color: white;
-  align-self: flex-end;
   border-bottom-right-radius: 0;
 }
 
 .chat-message.other {
+  align-self: flex-start;
   background-color: #333;
   color: white;
-  align-self: flex-start;
   border-bottom-left-radius: 0;
-      }
+}
 
-    #chat-input {
-      display: flex;
+.chat-username {
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 3px;
+  }: flex;
     }
 
     #chat-input input[type="text"] {
@@ -172,21 +179,50 @@
       console.log("Username accepted:", username);
     });
 
-    function appendMessage(sender, message) {
+    // Function to get consistent color per username
+function getUsernameColor(name) {
+  const colors = [
+    "#e6194b", "#3cb44b", "#ffe119", "#4363d8",
+    "#f58231", "#911eb4", "#46f0f0", "#f032e6",
+    "#bcf60c", "#fabebe", "#008080", "#e6beff",
+    "#9a6324", "#fffac8", "#800000", "#aaffc3"
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+
+function appendMessage(sender, message) {
   const chatMessage = document.createElement("div");
-  chatMessage.className = "chat-message";
+  const messageText = document.createElement("div");
 
   if (sender === username) {
-    chatMessage.classList.add("user");
-    chatMessage.textContent = message;
+    chatMessage.className = "chat-message user";
+    messageText.textContent = message;
+    chatMessage.appendChild(messageText);
   } else if (sender === "System") {
     chatMessage.style.textAlign = "center";
     chatMessage.style.color = "#888";
     chatMessage.textContent = message;
   } else {
-    chatMessage.classList.add("other");
-    chatMessage.textContent = `${sender}: ${message}`;
+    chatMessage.className = "chat-message other";
+
+    const usernameDiv = document.createElement("div");
+    usernameDiv.className = "chat-username";
+    usernameDiv.textContent = sender;
+    usernameDiv.style.color = getUsernameColor(sender);
+
+    messageText.textContent = message;
+
+    chatMessage.appendChild(usernameDiv);
+    chatMessage.appendChild(messageText);
   }
+
+  chatBox.appendChild(chatMessage);
+  chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
   chatBox.appendChild(chatMessage);
   chatBox.scrollTop = chatBox.scrollHeight;
