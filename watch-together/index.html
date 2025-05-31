@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Watch Together</title>
   <style>
     body {
@@ -21,7 +21,7 @@
       top: 0;
       left: 0;
       width: 100%;
-      height: 60%; /* Fixed height for video container */
+      height: 60%;
       background-color: #000;
       z-index: 1;
     }
@@ -37,7 +37,7 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 40%; /* Fixed height for chat container */
+      height: 40%;
       background-color: #1e1e1e;
       display: flex;
       flex-direction: column;
@@ -62,14 +62,7 @@
       padding: 5px 10px;
       border-radius: 5px;
       display: inline-block;
-    }
-
-    .chat-message:nth-child(odd) {
       background-color: #333;
-    }
-
-    .chat-message:nth-child(even) {
-      background-color: #444;
     }
 
     #chat-input {
@@ -117,6 +110,7 @@
   <div id="video-container">
     <iframe src="https://drive.google.com/file/d/1FwRD1AxYs9SChm_DoG-Y8bKXFs6zoYmR/preview" allowfullscreen></iframe>
   </div>
+
   <div id="chat-container">
     <div id="chat-box"></div>
     <div id="chat-input">
@@ -128,58 +122,68 @@
 
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <script>
-    const socket = io("https://zigzag-bird-orchestra.glitch.me/"); // Replace with your Glitch URL
+    const socket = io("https://zigzag-bird-orchestra.glitch.me/");
 
     const chatBox = document.getElementById("chat-box");
     const messageInput = document.getElementById("message");
     const sendButton = document.getElementById("send");
     const changeUsernameButton = document.getElementById("change-username-button");
 
-    // Retrieve username from localStorage or prompt the user to enter one
-    let username = localStorage.getItem("username") || prompt("Enter your username:");
-    if (!username) {
-      username = `User${Math.floor(Math.random() * 1000)}`;
+    let username = localStorage.getItem("username");
+
+    function askUsername() {
+      username = prompt("Enter your username:");
+      if (!username) {
+        username = `User${Math.floor(Math.random() * 1000)}`;
+      }
       localStorage.setItem("username", username);
+      socket.emit("setUsername", username);
     }
 
-    // Function to append messages to the chat box
-    function appendMessage(username, message, color) {
+    // Try setting username on first load
+    if (!username) {
+      askUsername();
+    } else {
+      socket.emit("setUsername", username);
+    }
+
+    socket.on("usernameExists", () => {
+      alert("Username already exists! Please choose another.");
+      askUsername();
+    });
+
+    socket.on("usernameAccepted", () => {
+      console.log("Username accepted:", username);
+    });
+
+    function appendMessage(username, message) {
       const chatMessage = document.createElement("div");
       chatMessage.className = "chat-message";
-      chatMessage.style.color = color || "#fff";
+      chatMessage.style.color = "#fff";
       chatMessage.textContent = `${username}: ${message}`;
       chatBox.appendChild(chatMessage);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // Send message when button is clicked
     sendButton.addEventListener("click", () => {
       const message = messageInput.value.trim();
       if (message) {
         socket.emit("chatMessage", { username, message });
-        messageInput.value = ""; // Clear input field
+        messageInput.value = "";
       }
     });
 
-    // Receive messages from server
     socket.on("chatMessage", (data) => {
-      appendMessage(data.username, data.message, data.color);
+      appendMessage(data.username, data.message);
     });
 
-    // Load previous messages when a user joins
     socket.on("loadMessages", (messages) => {
-      messages.forEach((msg) => appendMessage(msg.username, msg.message, msg.color));
+      messages.forEach((msg) => appendMessage(msg.username, msg.message));
     });
 
-    // Change username functionality
     changeUsernameButton.addEventListener("click", () => {
-      const newUsername = prompt("Enter a new username:");
-      if (newUsername) {
-        username = newUsername;
-        localStorage.setItem("username", username); // Save the new username in localStorage
-        alert("Username changed successfully!");
-      }
+      askUsername();
     });
   </script>
 </body>
-</html>
+      </html>
