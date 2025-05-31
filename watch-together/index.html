@@ -87,31 +87,34 @@
 
     #chat-input input {
       flex: 1;
-      padding: 10px;
+      padding: 8px;
       border-radius: 4px;
       border: none;
       outline: none;
       background-color: #2a2a2a;
       color: white;
+      font-size: 14px;
     }
 
     #chat-input button {
       background-color: #25d366;
       border: none;
-      padding: 10px 16px;
+      padding: 6px 10px;
       border-radius: 4px;
       margin-left: 5px;
       cursor: pointer;
+      font-size: 14px;
     }
 
     #change-username-button {
       margin-top: 5px;
       background-color: #007bff;
       border: none;
-      padding: 8px;
+      padding: 6px 10px;
       color: white;
       border-radius: 4px;
       cursor: pointer;
+      font-size: 14px;
     }
 
     .message:hover {
@@ -153,35 +156,29 @@
 
     const userColors = {};
     let replyTo = null;
-    let username = localStorage.getItem("username") || prompt("Enter a username:");
+    let username = localStorage.getItem("username");
+    let waitingForUsernameChange = false;
 
-    function getColorForUsername(username) {
-      if (!userColors[username]) {
+    function getColorForUsername(name) {
+      if (!userColors[name]) {
         const hue = Math.floor(Math.random() * 360);
-        userColors[username] = `hsl(${hue}, 70%, 60%)`;
+        userColors[name] = `hsl(${hue}, 70%, 60%)`;
       }
-      return userColors[username];
+      return userColors[name];
     }
 
-    function requestUsername(u) {
-      socket.emit("checkUsername", u);
+    function askUsername() {
+      username = prompt("Enter a username:");
+      if (username) {
+        socket.emit("checkUsername", username);
+      }
     }
 
-    requestUsername(username);
-
-    socket.on("usernameExists", () => {
-      alert("Username already taken! Enter a different one.");
-      username = prompt("New username:");
-      requestUsername(username);
-    });
-
-    socket.on("usernameAvailable", (newUsername) => {
-      username = newUsername;
-      localStorage.setItem("username", username);
-      alert("Username changed successfully!");
-    });
-
-    localStorage.setItem("username", username);
+    if (!username) {
+      askUsername();
+    } else {
+      socket.emit("checkUsername", username);
+    }
 
     sendButton.onclick = () => {
       const message = messageInput.value.trim();
@@ -192,10 +189,36 @@
       replyTo = null;
     };
 
+    socket.on("usernameExists", () => {
+      if (waitingForUsernameChange) {
+        alert("Username already taken!");
+        waitingForUsernameChange = false;
+      } else {
+        alert("Username already taken. Please enter another:");
+        askUsername();
+      }
+    });
+
+    socket.on("usernameAvailable", (newUsername) => {
+      username = newUsername;
+      localStorage.setItem("username", username);
+      if (waitingForUsernameChange) {
+        alert("Username changed to: " + username);
+        waitingForUsernameChange = false;
+      }
+    });
+
+    changeUsernameButton.onclick = () => {
+      const newUsername = prompt("Enter new username:");
+      if (newUsername && newUsername !== username) {
+        waitingForUsernameChange = true;
+        socket.emit("checkUsername", newUsername);
+      }
+    };
+
     function appendMessage(data, isOwn) {
       const msgDiv = document.createElement("div");
-      msgDiv.classList.add("message");
-      msgDiv.classList.add(isOwn ? "own" : "other");
+      msgDiv.classList.add("message", isOwn ? "own" : "other");
 
       msgDiv.onclick = () => {
         replyTo = data;
@@ -213,7 +236,7 @@
       if (data.replyTo) {
         const replyBox = document.createElement("div");
         replyBox.className = "reply-box";
-        replyBox.innerHTML = `<span class='replied-to'>${data.replyTo.username}:</span> ${data.replyTo.message}`;
+        replyBox.innerHTML = `<span class="replied-to">${data.replyTo.username}:</span> ${data.replyTo.message}`;
         msgDiv.appendChild(replyBox);
       }
 
@@ -242,13 +265,6 @@
       chatBox.appendChild(sysMsg);
       chatBox.scrollTop = chatBox.scrollHeight;
     });
-
-    changeUsernameButton.onclick = () => {
-      const newUsername = prompt("Enter a new username:");
-      if (newUsername && newUsername !== username) {
-        requestUsername(newUsername);
-      }
-    };
   </script>
 </body>
 </html>
