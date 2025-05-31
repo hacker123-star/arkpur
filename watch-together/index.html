@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Watch Together</title>
   <style>
     body {
@@ -12,8 +12,11 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }#video-container {
-  flex: 3;
+  width: 100%;
+  height: 60%;
+  background-color: #000;
 }
 
 iframe {
@@ -23,81 +26,82 @@ iframe {
 }
 
 #chat-container {
-  flex: 2;
+  height: 40%;
+  background-color: #1e1e1e;
   display: flex;
   flex-direction: column;
   padding: 10px;
-  background-color: #1e1e1e;
 }
 
 #chat-box {
   flex: 1;
   overflow-y: auto;
   margin-bottom: 10px;
-  background-color: #121212;
   padding: 10px;
+  background-color: #121212;
   border-radius: 5px;
+  display: flex;
+  flex-direction: column;
 }
 
 .chat-message {
-  margin: 8px 0;
   max-width: 80%;
   padding: 8px 12px;
+  margin: 5px;
   border-radius: 10px;
-  position: relative;
+  display: inline-block;
   word-wrap: break-word;
+  position: relative;
 }
 
-.chat-message.self {
-  background-color: #128c7e;
-  color: white;
+.my-message {
   align-self: flex-end;
+  background-color: #25d366;
+  color: black;
 }
 
-.chat-message.other {
+.other-message {
+  align-self: flex-start;
   background-color: #2c2c2c;
   color: white;
-  align-self: flex-start;
 }
 
-.sender-name {
-  font-size: 0.8em;
-  margin-bottom: 4px;
+.username {
   font-weight: bold;
+  margin-bottom: 2px;
 }
 
-.reply-box {
-  font-size: 0.75em;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-left: 3px solid #999;
+.reply-preview {
+  font-size: 0.85em;
   padding: 4px 8px;
-  margin-bottom: 5px;
-  border-radius: 5px;
+  margin-bottom: 4px;
+  border-left: 3px solid gray;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .system-message {
-  text-align: center;
-  font-size: 0.85em;
+  align-self: center;
   color: gray;
-  margin: 10px auto;
+  font-style: italic;
+  margin: 5px auto;
 }
 
 #chat-input {
   display: flex;
-  gap: 10px;
 }
 
 #chat-input input[type="text"] {
   flex: 1;
   padding: 10px;
-  border-radius: 5px;
   border: none;
-  background-color: #2c2c2c;
+  border-radius: 5px;
+  margin-right: 10px;
+  background-color: #222;
   color: white;
 }
 
 #chat-input button {
-  padding: 10px;
+  padding: 10px 15px;
   border: none;
   border-radius: 5px;
   background-color: #007bff;
@@ -105,13 +109,21 @@ iframe {
   cursor: pointer;
 }
 
+#chat-input button:hover {
+  background-color: #0056b3;
+}
+
 #change-username-button {
   background-color: #28a745;
   color: white;
-  padding: 8px 12px;
+  padding: 8px 16px;
   border-radius: 5px;
   cursor: pointer;
   margin-top: 10px;
+}
+
+#change-username-button:hover {
+  background-color: #218838;
 }
 
   </style>
@@ -119,8 +131,7 @@ iframe {
 <body>
   <div id="video-container">
     <iframe src="https://drive.google.com/file/d/1FwRD1AxYs9SChm_DoG-Y8bKXFs6zoYmR/preview" allowfullscreen></iframe>
-  </div>
-  <div id="chat-container">
+  </div>  <div id="chat-container">
     <div id="chat-box"></div>
     <div id="chat-input">
       <input type="text" id="message" placeholder="Type a message...">
@@ -129,121 +140,110 @@ iframe {
     <button id="change-username-button">Change Username</button>
   </div>  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>  <script>
     const socket = io("https://zigzag-bird-orchestra.glitch.me/");
+
     const chatBox = document.getElementById("chat-box");
     const messageInput = document.getElementById("message");
     const sendButton = document.getElementById("send");
     const changeUsernameButton = document.getElementById("change-username-button");
 
+    let username = localStorage.getItem("username") || prompt("Enter your username:");
+    let replyTo = null;
+
+    if (!username) {
+      username = `User${Math.floor(Math.random() * 1000)}`;
+    }
+
+    socket.emit("setUsername", username, (isTaken) => {
+      if (isTaken) {
+        alert("Username already exists! Please reload and choose another.");
+      } else {
+        localStorage.setItem("username", username);
+      }
+    });
+
     const userColors = {};
 
-    function assignColor(username) {
-      if (!userColors[username]) {
-        const colors = ["#e91e63", "#ff9800", "#9c27b0", "#03a9f4", "#4caf50"];
-        userColors[username] = colors[Object.keys(userColors).length % colors.length];
+    function getColorForUsername(name) {
+      if (!userColors[name]) {
+        const hash = [...name].reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        const hue = hash % 360;
+        userColors[name] = `hsl(${hue}, 80%, 60%)`;
       }
-      return userColors[username];
+      return userColors[name];
     }
 
-    function appendMessage(username, message, color, replyTo, isSystem) {
-      const chatMessage = document.createElement("div");
+    function appendMessage({ username: user, message, isSystem, reply }) {
+      const messageDiv = document.createElement("div");
 
       if (isSystem) {
-        chatMessage.className = "system-message";
-        chatMessage.textContent = message;
-      } else {
-        const msgWrapper = document.createElement("div");
-        msgWrapper.className = "chat-message";
-        msgWrapper.classList.add(username === localStorage.getItem("username") ? "self" : "other");
-
-        if (replyTo) {
-          const replyBox = document.createElement("div");
-          replyBox.className = "reply-box";
-          replyBox.innerHTML = `<strong style="color:${assignColor(replyTo.username)}">${replyTo.username}</strong><br>${replyTo.message}`;
-          msgWrapper.appendChild(replyBox);
-        }
-
-        if (username !== localStorage.getItem("username")) {
-          const name = document.createElement("div");
-          name.className = "sender-name";
-          name.style.color = color;
-          name.textContent = username;
-          msgWrapper.appendChild(name);
-        }
-
-        const text = document.createElement("div");
-        text.textContent = message;
-        msgWrapper.appendChild(text);
-        chatMessage.appendChild(msgWrapper);
+        messageDiv.className = "system-message";
+        messageDiv.textContent = message;
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return;
       }
 
-      chatBox.appendChild(chatMessage);
+      const isMine = user === username;
+      messageDiv.className = `chat-message ${isMine ? "my-message" : "other-message"}`;
+
+      if (!isMine) {
+        const name = document.createElement("div");
+        name.className = "username";
+        name.textContent = user;
+        name.style.color = getColorForUsername(user);
+        messageDiv.appendChild(name);
+      }
+
+      if (reply) {
+        const replyPreview = document.createElement("div");
+        replyPreview.className = "reply-preview";
+        replyPreview.innerHTML = `<strong>${reply.username}:</strong> ${reply.message}`;
+        messageDiv.appendChild(replyPreview);
+      }
+
+      const msg = document.createElement("div");
+      msg.textContent = message;
+      messageDiv.appendChild(msg);
+
+      messageDiv.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        replyTo = { username: user, message };
+        alert(`Replying to ${user}: ${message}`);
+      });
+
+      chatBox.appendChild(messageDiv);
       chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    async function setUsername() {
-      let username = "";
-      while (!username) {
-        username = prompt("Enter your username:");
-        if (!username) continue;
-        socket.emit("setUsername", username, (res) => {
-          if (res.success) {
-            localStorage.setItem("username", username);
-          } else {
-            alert(res.message);
-            username = "";
-          }
-        });
-        await new Promise((r) => setTimeout(r, 500));
-      }
-      return username;
-    }
-
-    let username = localStorage.getItem("username");
-    if (!username) {
-      setUsername().then((name) => {
-        username = name;
-      });
-    } else {
-      socket.emit("setUsername", username, (res) => {
-        if (!res.success) {
-          setUsername().then((name) => {
-            username = name;
-          });
-        }
-      });
     }
 
     sendButton.addEventListener("click", () => {
       const message = messageInput.value.trim();
       if (message) {
-        socket.emit("chatMessage", { username, message });
+        socket.emit("chatMessage", { username, message, reply: replyTo });
         messageInput.value = "";
+        replyTo = null;
       }
     });
 
-    socket.on("chatMessage", (data) => {
-      appendMessage(data.username, data.message, assignColor(data.username), data.replyTo);
-    });
-
-    socket.on("systemMessage", (text) => {
-      appendMessage(null, text, null, null, true);
-    });
+    socket.on("chatMessage", appendMessage);
+    socket.on("systemMessage", (msg) => appendMessage({ message: msg, isSystem: true }));
 
     socket.on("loadMessages", (messages) => {
-      messages.forEach((msg) => {
-        if (msg.system) {
-          appendMessage(null, msg.message, null, null, true);
-        } else {
-          appendMessage(msg.username, msg.message, assignColor(msg.username), msg.replyTo);
-        }
-      });
+      messages.forEach(appendMessage);
     });
 
     changeUsernameButton.addEventListener("click", () => {
-      setUsername().then((name) => {
-        username = name;
-        alert("Username changed.");
-      });
+      const newUsername = prompt("Enter a new username:");
+      if (newUsername) {
+        socket.emit("setUsername", newUsername, (isTaken) => {
+          if (isTaken) {
+            alert("Username already exists! Try another.");
+          } else {
+            username = newUsername;
+            localStorage.setItem("username", newUsername);
+            alert("Username changed!");
+          }
+        });
+      }
     });
   </script></body>
 </html>
