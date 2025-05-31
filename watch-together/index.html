@@ -172,13 +172,24 @@
       console.log("Username accepted:", username);
     });
 
-    function appendMessage(username, message) {
-      const chatMessage = document.createElement("div");
-      chatMessage.className = "chat-message";
-      chatMessage.style.color = "#fff";
-      chatMessage.textContent = `${username}: ${message}`;
-      chatBox.appendChild(chatMessage);
-      chatBox.scrollTop = chatBox.scrollHeight;
+    function appendMessage(sender, message) {
+  const chatMessage = document.createElement("div");
+  chatMessage.className = "chat-message";
+
+  if (sender === username) {
+    chatMessage.classList.add("user");
+    chatMessage.textContent = message;
+  } else if (sender === "System") {
+    chatMessage.style.textAlign = "center";
+    chatMessage.style.color = "#888";
+    chatMessage.textContent = message;
+  } else {
+    chatMessage.classList.add("other");
+    chatMessage.textContent = `${sender}: ${message}`;
+  }
+
+  chatBox.appendChild(chatMessage);
+  chatBox.scrollTop = chatBox.scrollHeight;
     }
 
     sendButton.addEventListener("click", () => {
