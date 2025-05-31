@@ -2,120 +2,116 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Watch Together Chat</title>
+  <title>Watch Together</title>
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #0d0d0d;
+      background-color: #121212;
       color: white;
       height: 100vh;
       display: flex;
       flex-direction: column;
     }#video-container {
-  height: 60%;
-  background: black;
+  flex: 3;
 }
 
 iframe {
   width: 100%;
   height: 100%;
+  border: none;
 }
 
 #chat-container {
-  height: 40%;
-  background: #1a1a1a;
+  flex: 2;
   display: flex;
   flex-direction: column;
   padding: 10px;
+  background-color: #1e1e1e;
 }
 
 #chat-box {
   flex: 1;
   overflow-y: auto;
-  padding-right: 10px;
+  margin-bottom: 10px;
+  background-color: #121212;
+  padding: 10px;
+  border-radius: 5px;
 }
 
-.message {
+.chat-message {
+  margin: 8px 0;
   max-width: 80%;
-  margin: 8px;
   padding: 8px 12px;
-  border-radius: 8px;
-  word-wrap: break-word;
+  border-radius: 10px;
   position: relative;
+  word-wrap: break-word;
 }
 
-.own {
-  background-color: #075e54;
+.chat-message.self {
+  background-color: #128c7e;
   color: white;
-  margin-left: auto;
-  border-bottom-right-radius: 0;
+  align-self: flex-end;
 }
 
-.other {
-  background-color: #2a2a2a;
+.chat-message.other {
+  background-color: #2c2c2c;
   color: white;
-  border-bottom-left-radius: 0;
+  align-self: flex-start;
 }
 
-.name {
+.sender-name {
+  font-size: 0.8em;
+  margin-bottom: 4px;
   font-weight: bold;
-  margin-bottom: 2px;
 }
 
 .reply-box {
-  background: #1f1f1f;
+  font-size: 0.75em;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-left: 3px solid #999;
   padding: 4px 8px;
-  border-left: 4px solid limegreen;
-  font-size: 0.9em;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
+  border-radius: 5px;
 }
 
-.replied-to {
-  color: limegreen;
+.system-message {
+  text-align: center;
+  font-size: 0.85em;
+  color: gray;
+  margin: 10px auto;
 }
 
 #chat-input {
   display: flex;
-  margin-top: 5px;
+  gap: 10px;
 }
 
-#chat-input input {
+#chat-input input[type="text"] {
   flex: 1;
   padding: 10px;
-  border-radius: 4px;
+  border-radius: 5px;
   border: none;
-  outline: none;
-  background-color: #2a2a2a;
+  background-color: #2c2c2c;
   color: white;
 }
 
 #chat-input button {
-  background-color: #25d366;
+  padding: 10px;
   border: none;
-  padding: 10px 16px;
-  border-radius: 4px;
-  margin-left: 5px;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
   cursor: pointer;
 }
 
 #change-username-button {
-  margin-top: 5px;
-  background-color: #007bff;
-  border: none;
-  padding: 8px;
+  background-color: #28a745;
   color: white;
-  border-radius: 4px;
+  padding: 8px 12px;
+  border-radius: 5px;
   cursor: pointer;
-}
-
-.quoted {
-  font-size: 0.85em;
-  opacity: 0.9;
-}
-
-.message:hover {
-  cursor: pointer;
+  margin-top: 10px;
 }
 
   </style>
@@ -127,98 +123,127 @@ iframe {
   <div id="chat-container">
     <div id="chat-box"></div>
     <div id="chat-input">
-      <input type="text" id="message" placeholder="Type a message..." />
+      <input type="text" id="message" placeholder="Type a message...">
       <button id="send">Send</button>
     </div>
     <button id="change-username-button">Change Username</button>
   </div>  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>  <script>
-    const socket = io("https://zigzag-bird-orchestra.glitch.me/"); // Replace with your server
+    const socket = io("https://zigzag-bird-orchestra.glitch.me/");
     const chatBox = document.getElementById("chat-box");
     const messageInput = document.getElementById("message");
     const sendButton = document.getElementById("send");
     const changeUsernameButton = document.getElementById("change-username-button");
 
     const userColors = {};
-    let replyTo = null;
 
-    function getColorForUsername(username) {
+    function assignColor(username) {
       if (!userColors[username]) {
-        const hue = Math.floor(Math.random() * 360);
-        userColors[username] = `hsl(${hue}, 70%, 60%)`;
+        const colors = ["#e91e63", "#ff9800", "#9c27b0", "#03a9f4", "#4caf50"];
+        userColors[username] = colors[Object.keys(userColors).length % colors.length];
       }
       return userColors[username];
     }
 
-    let username = localStorage.getItem("username") || prompt("Enter a username:");
-    socket.emit("checkUsername", username);
+    function appendMessage(username, message, color, replyTo, isSystem) {
+      const chatMessage = document.createElement("div");
 
-    socket.on("usernameExists", () => {
-      alert("Username already taken! Enter a different one.");
-      username = prompt("New username:");
-      localStorage.setItem("username", username);
-      socket.emit("checkUsername", username);
-    });
+      if (isSystem) {
+        chatMessage.className = "system-message";
+        chatMessage.textContent = message;
+      } else {
+        const msgWrapper = document.createElement("div");
+        msgWrapper.className = "chat-message";
+        msgWrapper.classList.add(username === localStorage.getItem("username") ? "self" : "other");
 
-    localStorage.setItem("username", username);
+        if (replyTo) {
+          const replyBox = document.createElement("div");
+          replyBox.className = "reply-box";
+          replyBox.innerHTML = `<strong style="color:${assignColor(replyTo.username)}">${replyTo.username}</strong><br>${replyTo.message}`;
+          msgWrapper.appendChild(replyBox);
+        }
 
-    sendButton.onclick = () => {
-      const message = messageInput.value.trim();
-      if (!message) return;
-      socket.emit("chatMessage", { username, message, replyTo });
-      messageInput.value = "";
-      replyTo = null;
-    };
+        if (username !== localStorage.getItem("username")) {
+          const name = document.createElement("div");
+          name.className = "sender-name";
+          name.style.color = color;
+          name.textContent = username;
+          msgWrapper.appendChild(name);
+        }
 
-    function appendMessage(data, isOwn) {
-      const msgDiv = document.createElement("div");
-      msgDiv.classList.add("message");
-      msgDiv.classList.add(isOwn ? "own" : "other");
-      msgDiv.onclick = () => {
-        replyTo = data;
-        messageInput.placeholder = `Replying to ${data.username}: ${data.message}`;
-      };
-
-      if (!isOwn) {
-        const name = document.createElement("div");
-        name.className = "name";
-        name.textContent = data.username;
-        name.style.color = getColorForUsername(data.username);
-        msgDiv.appendChild(name);
+        const text = document.createElement("div");
+        text.textContent = message;
+        msgWrapper.appendChild(text);
+        chatMessage.appendChild(msgWrapper);
       }
 
-      if (data.replyTo) {
-        const replyBox = document.createElement("div");
-        replyBox.className = "reply-box";
-        replyBox.innerHTML = `<span class='replied-to'>${data.replyTo.username}:</span> ${data.replyTo.message}`;
-        msgDiv.appendChild(replyBox);
-      }
-
-      const text = document.createElement("div");
-      text.textContent = data.message;
-      msgDiv.appendChild(text);
-
-      chatBox.appendChild(msgDiv);
+      chatBox.appendChild(chatMessage);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
+    async function setUsername() {
+      let username = "";
+      while (!username) {
+        username = prompt("Enter your username:");
+        if (!username) continue;
+        socket.emit("setUsername", username, (res) => {
+          if (res.success) {
+            localStorage.setItem("username", username);
+          } else {
+            alert(res.message);
+            username = "";
+          }
+        });
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      return username;
+    }
+
+    let username = localStorage.getItem("username");
+    if (!username) {
+      setUsername().then((name) => {
+        username = name;
+      });
+    } else {
+      socket.emit("setUsername", username, (res) => {
+        if (!res.success) {
+          setUsername().then((name) => {
+            username = name;
+          });
+        }
+      });
+    }
+
+    sendButton.addEventListener("click", () => {
+      const message = messageInput.value.trim();
+      if (message) {
+        socket.emit("chatMessage", { username, message });
+        messageInput.value = "";
+      }
+    });
+
     socket.on("chatMessage", (data) => {
-      appendMessage(data, data.username === username);
+      appendMessage(data.username, data.message, assignColor(data.username), data.replyTo);
+    });
+
+    socket.on("systemMessage", (text) => {
+      appendMessage(null, text, null, null, true);
     });
 
     socket.on("loadMessages", (messages) => {
-      messages.forEach((m) => appendMessage(m, m.username === username));
+      messages.forEach((msg) => {
+        if (msg.system) {
+          appendMessage(null, msg.message, null, null, true);
+        } else {
+          appendMessage(msg.username, msg.message, assignColor(msg.username), msg.replyTo);
+        }
+      });
     });
 
-    changeUsernameButton.onclick = () => {
-      const newUsername = prompt("Enter a new username:");
-      if (newUsername && newUsername !== username) {
-        socket.emit("checkUsername", newUsername);
-        socket.on("usernameAvailable", () => {
-          username = newUsername;
-          localStorage.setItem("username", username);
-          alert("Username changed successfully!");
-        });
-      }
-    };
+    changeUsernameButton.addEventListener("click", () => {
+      setUsername().then((name) => {
+        username = name;
+        alert("Username changed.");
+      });
+    });
   </script></body>
 </html>
