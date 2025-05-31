@@ -9,13 +9,13 @@
       font-family: Arial, sans-serif;
       background-color: #121212;
       color: white;
-      height: 100vh;
       display: flex;
       flex-direction: column;
+      height: 100vh;
       overflow: hidden;
     }#video-container {
+  flex: 0 0 40%;
   width: 100%;
-  height: 60%;
   background-color: #000;
 }
 
@@ -26,17 +26,20 @@ iframe {
 }
 
 #chat-container {
-  height: 40%;
+  flex: 1;
+  width: 100%;
   background-color: #1e1e1e;
   display: flex;
   flex-direction: column;
   padding: 10px;
+  box-sizing: border-box;
 }
 
 #chat-box {
   flex: 1;
   overflow-y: auto;
   margin-bottom: 10px;
+  border: 1px solid #333;
   padding: 10px;
   background-color: #121212;
   border-radius: 5px;
@@ -46,48 +49,53 @@ iframe {
 
 .chat-message {
   max-width: 80%;
-  padding: 8px 12px;
   margin: 5px;
+  padding: 8px 12px;
   border-radius: 10px;
   display: inline-block;
   word-wrap: break-word;
   position: relative;
 }
 
-.my-message {
+.own-message {
   align-self: flex-end;
-  background-color: #25d366;
-  color: black;
+  background-color: #075e54;
+  color: white;
+  text-align: right;
 }
 
 .other-message {
   align-self: flex-start;
-  background-color: #2c2c2c;
+  background-color: #2a2a2a;
   color: white;
 }
 
 .username {
   font-weight: bold;
   margin-bottom: 2px;
-}
-
-.reply-preview {
-  font-size: 0.85em;
-  padding: 4px 8px;
-  margin-bottom: 4px;
-  border-left: 3px solid gray;
-  background-color: rgba(255, 255, 255, 0.1);
+  color: #00e676;
 }
 
 .system-message {
   align-self: center;
-  color: gray;
+  color: #bbb;
   font-style: italic;
-  margin: 5px auto;
+  margin: 10px 0;
+}
+
+.reply-container {
+  background-color: #1f1f1f;
+  border-left: 3px solid #007bff;
+  padding: 5px 10px;
+  margin-bottom: 4px;
+  font-size: 0.9em;
+  color: #ccc;
+  border-radius: 5px;
 }
 
 #chat-input {
   display: flex;
+  gap: 10px;
 }
 
 #chat-input input[type="text"] {
@@ -95,7 +103,6 @@ iframe {
   padding: 10px;
   border: none;
   border-radius: 5px;
-  margin-right: 10px;
   background-color: #222;
   color: white;
 }
@@ -131,7 +138,8 @@ iframe {
 <body>
   <div id="video-container">
     <iframe src="https://drive.google.com/file/d/1FwRD1AxYs9SChm_DoG-Y8bKXFs6zoYmR/preview" allowfullscreen></iframe>
-  </div>  <div id="chat-container">
+  </div>
+  <div id="chat-container">
     <div id="chat-box"></div>
     <div id="chat-input">
       <input type="text" id="message" placeholder="Type a message...">
@@ -147,102 +155,102 @@ iframe {
     const changeUsernameButton = document.getElementById("change-username-button");
 
     let username = localStorage.getItem("username") || prompt("Enter your username:");
-    let replyTo = null;
 
-    if (!username) {
-      username = `User${Math.floor(Math.random() * 1000)}`;
+    function promptUsername() {
+      socket.emit("checkUsername", username);
     }
 
-    socket.emit("setUsername", username, (isTaken) => {
-      if (isTaken) {
-        alert("Username already exists! Please reload and choose another.");
+    socket.on("usernameStatus", (isAvailable) => {
+      if (!isAvailable) {
+        username = prompt("Username already exists. Enter a different one:");
+        promptUsername();
       } else {
         localStorage.setItem("username", username);
+        socket.emit("join", username);
       }
     });
 
-    const userColors = {};
-
-    function getColorForUsername(name) {
-      if (!userColors[name]) {
-        const hash = [...name].reduce((acc, c) => acc + c.charCodeAt(0), 0);
-        const hue = hash % 360;
-        userColors[name] = `hsl(${hue}, 80%, 60%)`;
-      }
-      return userColors[name];
+    if (username) {
+      promptUsername();
     }
 
-    function appendMessage({ username: user, message, isSystem, reply }) {
-      const messageDiv = document.createElement("div");
-
-      if (isSystem) {
-        messageDiv.className = "system-message";
-        messageDiv.textContent = message;
-        chatBox.appendChild(messageDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-        return;
-      }
-
-      const isMine = user === username;
-      messageDiv.className = `chat-message ${isMine ? "my-message" : "other-message"}`;
-
-      if (!isMine) {
-        const name = document.createElement("div");
-        name.className = "username";
-        name.textContent = user;
-        name.style.color = getColorForUsername(user);
-        messageDiv.appendChild(name);
-      }
-
-      if (reply) {
-        const replyPreview = document.createElement("div");
-        replyPreview.className = "reply-preview";
-        replyPreview.innerHTML = `<strong>${reply.username}:</strong> ${reply.message}`;
-        messageDiv.appendChild(replyPreview);
-      }
-
+    function appendMessage(data) {
+      const { username: sender, message, self, replyTo } = data;
       const msg = document.createElement("div");
-      msg.textContent = message;
-      messageDiv.appendChild(msg);
+      msg.className = `chat-message ${self ? "own-message" : "other-message"}`;
 
-      messageDiv.addEventListener("contextmenu", (e) => {
-        e.preventDefault();
-        replyTo = { username: user, message };
-        alert(`Replying to ${user}: ${message}`);
+      if (!self) {
+        const nameEl = document.createElement("div");
+        nameEl.className = "username";
+        nameEl.textContent = sender;
+        msg.appendChild(nameEl);
+      }
+
+      if (replyTo) {
+        const reply = document.createElement("div");
+        reply.className = "reply-container";
+        reply.textContent = `${replyTo.username}: ${replyTo.message}`;
+        msg.appendChild(reply);
+      }
+
+      const content = document.createElement("div");
+      content.textContent = message;
+      msg.appendChild(content);
+
+      msg.addEventListener("click", () => {
+        replyTarget = { username: sender, message };
+        messageInput.placeholder = `Replying to ${sender}: ${message}`;
       });
 
-      chatBox.appendChild(messageDiv);
+      chatBox.appendChild(msg);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
+    function appendSystemMessage(text) {
+      const systemMsg = document.createElement("div");
+      systemMsg.className = "system-message";
+      systemMsg.textContent = text;
+      chatBox.appendChild(systemMsg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    let replyTarget = null;
+
     sendButton.addEventListener("click", () => {
-      const message = messageInput.value.trim();
-      if (message) {
-        socket.emit("chatMessage", { username, message, reply: replyTo });
+      const msg = messageInput.value.trim();
+      if (msg) {
+        socket.emit("chatMessage", { username, message: msg, replyTo: replyTarget });
         messageInput.value = "";
-        replyTo = null;
+        messageInput.placeholder = "Type a message...";
+        replyTarget = null;
       }
     });
 
-    socket.on("chatMessage", appendMessage);
-    socket.on("systemMessage", (msg) => appendMessage({ message: msg, isSystem: true }));
+    socket.on("chatMessage", (data) => {
+      appendMessage({
+        ...data,
+        self: data.username === username
+      });
+    });
 
     socket.on("loadMessages", (messages) => {
-      messages.forEach(appendMessage);
+      messages.forEach(data => {
+        appendMessage({
+          ...data,
+          self: data.username === username
+        });
+      });
+    });
+
+    socket.on("systemMessage", (text) => {
+      appendSystemMessage(text);
     });
 
     changeUsernameButton.addEventListener("click", () => {
       const newUsername = prompt("Enter a new username:");
       if (newUsername) {
-        socket.emit("setUsername", newUsername, (isTaken) => {
-          if (isTaken) {
-            alert("Username already exists! Try another.");
-          } else {
-            username = newUsername;
-            localStorage.setItem("username", newUsername);
-            alert("Username changed!");
-          }
-        });
+        username = newUsername;
+        promptUsername();
       }
     });
   </script></body>
