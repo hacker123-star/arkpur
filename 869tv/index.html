@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Watch Together</title>
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    video {
+      width: 80%;
+      max-width: 800px;
+      margin: 20px 0;
+      border-radius: 10px;
+      box-shadow: 0 0 20px #000;
+    }
+    h1 {
+      font-size: 28px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎬 Watch Together</h1>
+
+  <video id="video" controls>
+    <source src="https://pixeldrain.com/u/BykUbhKQ?download" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const video = document.getElementById("video");
+    let isRemote = false;
+
+    video.addEventListener("play", () => {
+      if (!isRemote) socket.emit("play", video.currentTime);
+    });
+
+    video.addEventListener("pause", () => {
+      if (!isRemote) socket.emit("pause", video.currentTime);
+    });
+
+    video.addEventListener("seeked", () => {
+      if (!isRemote) socket.emit("seek", video.currentTime);
+    });
+
+    socket.on("play", (time) => {
+      isRemote = true;
+      video.currentTime = time;
+      video.play().finally(() => isRemote = false);
+    });
+
+    socket.on("pause", (time) => {
+      isRemote = true;
+      video.currentTime = time;
+      video.pause();
+      isRemote = false;
+    });
+
+    socket.on("seek", (time) => {
+      isRemote = true;
+      video.currentTime = time;
+      isRemote = false;
+    });
+  </script>
+</body>
+</html>
