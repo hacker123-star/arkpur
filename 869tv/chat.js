@@ -1,71 +1,74 @@
-const socket = io("https://wonderful-destiny-open.glitch.me"); // Change to your Glitch URL
+const socket = io("https://wonderful-destiny-open.glitch.me");
 
 const video = document.getElementById("video");
-const chatBox = document.getElementById("chat-messages");
-const messageInput = document.getElementById("message-input");
-const sendBtn = document.getElementById("send-btn");
-const replyPreview = document.getElementById("reply-preview");
-const replyToText = document.getElementById("reply-to-text");
-
-let replyTo = null;
-let isSeeking = false;
-
+let seeking = false;
+let isRemote = false;
 let username = prompt("Enter your name:") || "Guest";
+
+// === JOIN ===
 socket.emit("join", username);
 
-// Video event listeners to emit play/pause/seek
+// === Sync on Join ===
+socket.on("video state", ({ time, playing }) => {
+  isRemote = true;
+  video.currentTime = time;
+  playing ? video.play() : video.pause();
+});
+
+// === Video Controls ===
 video.addEventListener("play", () => {
-  if (!isSeeking) socket.emit("play", video.currentTime);
+  if (!isRemote) socket.emit("play", video.currentTime);
+  isRemote = false;
 });
 
 video.addEventListener("pause", () => {
-  if (!isSeeking) socket.emit("pause", video.currentTime);
+  if (!isRemote) socket.emit("pause", video.currentTime);
+  isRemote = false;
 });
 
 video.addEventListener("seeking", () => {
-  isSeeking = true;
+  seeking = true;
 });
-
 video.addEventListener("seeked", () => {
-  socket.emit("seek", video.currentTime);
-  isSeeking = false;
+  if (!isRemote) socket.emit("seek", video.currentTime);
+  isRemote = false;
+  seeking = false;
 });
 
-// Listen to video state updates from backend
-socket.on("video state", (state) => {
-  video.currentTime = state.time;
-  if (state.playing) {
-    video.play();
-  } else {
-    video.pause();
-  }
-});
-
+// === Server Updates ===
 socket.on("play", (time) => {
+  isRemote = true;
   video.currentTime = time;
   video.play();
 });
 
 socket.on("pause", (time) => {
+  isRemote = true;
   video.currentTime = time;
   video.pause();
 });
 
 socket.on("seek", (time) => {
+  isRemote = true;
   video.currentTime = time;
 });
 
-// Chat message send button click
+// === CHAT CODE stays same ===
+// (chat.js continues with message sending & reply features...)
+
+// === CHAT EVENTS ===
 sendBtn.onclick = () => {
   const text = messageInput.value.trim();
   if (text !== "") {
-    socket.emit("chat message", { message: text, replyTo });
+    socket.emit("chat message", {
+      message: text,
+      replyTo
+    });
     messageInput.value = "";
     cancelReply();
   }
 };
 
-// Receive chat messages
 socket.on("chat message", ({ username, message, replyTo }) => {
   const msgDiv = document.createElement("div");
   msgDiv.classList.add("message");
@@ -81,18 +84,16 @@ socket.on("chat message", ({ username, message, replyTo }) => {
   content.innerHTML = `<strong>${username}:</strong> ${message}`;
   msgDiv.appendChild(content);
   
-  // Clicking on message sets reply
   msgDiv.onclick = () => {
     replyTo = `${username}: ${message}`;
     replyToText.textContent = replyTo;
-    replyPreview.style.display = "block";
+    replyPreview.style.display = "flex";
   };
   
   chatBox.appendChild(msgDiv);
   chatBox.scrollTop = chatBox.scrollHeight;
 });
 
-// Cancel reply
 function cancelReply() {
   replyTo = null;
   replyPreview.style.display = "none";
