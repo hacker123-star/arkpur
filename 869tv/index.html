@@ -2,35 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Watch Together</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>869tv - Watch Together</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="wrapper">
-    <div class="video-section">
-      <video id="video" controls>
-        <source src="assets/dandan.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-    </div>
+  <div class="app">
+    <video id="video" controls>
+      <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
 
-    <div class="chat-section">
-      <div id="chat-messages"></div>
-
-      <div class="reply-preview" id="reply-preview" style="display: none;">
-        Replying to: <span id="reply-to-text"></span>
-        <button onclick="cancelReply()">×</button>
+    <div class="chat-container">
+      <div class="header">
+        <span>869tv Chat</span>
+        <button onclick="changeUsername()">Change Username</button>
       </div>
-
-      <div class="chat-input">
-        <input type="text" id="message-input" placeholder="Type your message..." />
-        <button id="send-btn">Send</button>
-      </div>
+      <div id="chat" class="messages"></div>
+      <div id="replyBox" class="reply-box hidden"></div>
+      <input id="msg" type="text" placeholder="Type your message..." />
+      <button onclick="sendMessage()">Send</button>
     </div>
   </div>
 
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <script src="chat.js"></script>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
