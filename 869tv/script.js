@@ -7,25 +7,20 @@ const replyPreview = document.getElementById('replyPreview');
 const replyUsername = document.getElementById('replyUsername');
 const replyText = document.getElementById('replyText');
 let currentReply = null;
-
-// Load username from local storage
 let username = localStorage.getItem('username') || `User${Math.floor(Math.random() * 1000)}`;
 usernameInput.value = username;
+let lastSyncTime = 0;
+const syncInterval = 1000;
 
-// WebSocket connection to Glitch backend
-const ws = new WebSocket('wss://wonderful-destiny-open.glitch.me:8080');
+const ws = new WebSocket('wss://wonderful-destiny-open.glitch.me');
 
-// Update username
 function updateUsername() {
   const newUsername = usernameInput.value.trim();
   if (newUsername) {
-    username = newUsername;
-    localStorage.setItem('username', username);
-    alert('Username updated!');
+    ws.send(JSON.stringify({ type: 'username', username: newUsername }));
   }
 }
 
-// Send message
 function sendMessage() {
   const text = chatInput.value.trim();
   if (text) {
@@ -41,20 +36,17 @@ function sendMessage() {
   }
 }
 
-// Handle Enter key for sending messages
 chatInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     sendMessage();
   }
 });
 
-// Cancel reply
 function cancelReply() {
   currentReply = null;
   replyPreview.style.display = 'none';
 }
 
-// Reply to message
 function replyToMessage(message) {
   currentReply = message;
   replyUsername.textContent = message.username;
@@ -63,7 +55,6 @@ function replyToMessage(message) {
   chatInput.focus();
 }
 
-// Display message
 function displayMessage(message) {
   const messageDiv = document.createElement('div');
   messageDiv.className = 'message';
@@ -85,54 +76,77 @@ function displayMessage(message) {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// WebSocket events
+function syncVideoState() {
+  const currentTime = video.currentTime;
+  const isPlaying = !video.paused;
+  if (Math.abs(currentTime - videoState.time) > 0.5 || isPlaying !== videoState.isPlaying) {
+    ws.send(JSON.stringify({ type: 'video', time: currentTime, isPlaying }));
+  }
+}
+
 ws.onmessage = function(event) {
-  const data = JSON.parse(event.data);
-  if (data.type === 'videoState') {
-    video.currentTime = parseFloat(data.data.time);
-    if (data.data.isPlaying) {
-      video.play().catch((e) => console.error('Play error:', e));
-    } else {
-      video.pause();
+  try {
+    const data = JSON.parse(event.data);
+    if (data.type === 'videoState' || data.type === 'video') {
+      const serverTime = parseFloat(data.type === 'videoState' ? data.data.time : data.time);
+      const isPlaying = data.type === 'videoState' ? data.data.isPlaying : data.isPlaying;
+      const timeDiff = Math.abs(video.currentTime - serverTime);
+      if (timeDiff > 0.5 && Date.now() - lastSyncTime > syncInterval) {
+        video.currentTime = serverTime;
+        lastSyncTime = Date.now();
+      }
+      if (isPlaying && video.paused) {
+        video.play().catch((e) => console.error('Play error:', e));
+      } else if (!isPlaying && !video.paused) {
+        video.pause();
+      }
+      videoState = { time: serverTime, isPlaying };
+    } else if (data.type === 'chat') {
+      displayMessage(data.message);
+    } else if (data.type === 'usernameSuccess') {
+      username = data.username;
+      localStorage.setItem('username', username);
+      usernameInput.value = username;
+      alert('Username updated!');
+    } else if (data.type === 'usernameError') {
+      alert(data.message);
+      usernameInput.value = username;
+    } else if (data.type === 'usedUsernames') {
+      usedUsernames = new Set(data.data);
     }
-  } else if (data.type === 'video') {
-    video.currentTime = parseFloat(data.time);
-    if (data.isPlaying) {
-      video.play().catch((e) => console.error('Play error:', e));
-    } else {
-      video.pause();
-    }
-  } else if (data.type === 'chat') {
-    displayMessage(data.message);
+  } catch (e) {
+    console.error('WebSocket message error:', e);
   }
 };
 
-// Video sync events
 video.addEventListener('play', () => {
-  ws.send(JSON.stringify({ type: 'video', time: video.currentTime, isPlaying: true }));
+  syncVideoState();
 });
 
 video.addEventListener('pause', () => {
-  ws.send(JSON.stringify({ type: 'video', time: video.currentTime, isPlaying: false }));
+  syncVideoState();
 });
 
 video.addEventListener('seeked', () => {
-  ws.send(JSON.stringify({ type: 'video', time: video.currentTime, isPlaying: !video.paused }));
+  syncVideoState();
 });
 
-// Prevent local control conflicts
+video.addEventListener('timeupdate', () => {
+  if (Date.now() - lastSyncTime > syncInterval) {
+    syncVideoState();
+  }
+});
+
 video.addEventListener('click', (e) => {
   if (e.target.tagName === 'VIDEO') {
     e.preventDefault();
   }
 });
 
-// Auto-scroll chat
 chatMessages.addEventListener('DOMNodeInserted', () => {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 });
 
-// Initial sync request
 ws.onopen = function() {
-  ws.send(JSON.stringify({ type: 'requestState' }));
+  ws.send(JSON.stringify({ type: 'username', username }));
 };
