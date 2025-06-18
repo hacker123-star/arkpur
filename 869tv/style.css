@@ -49,12 +49,13 @@ header h1 {
 
 .main {
   display: flex;
+  flex-direction: column;
   gap: 20px;
   margin-top: 20px;
 }
 
 .video-section {
-  flex: 2;
+  width: 100%;
 }
 
 #videoPlayer {
@@ -63,11 +64,11 @@ header h1 {
 }
 
 .chat-section {
-  flex: 1;
   background: #2c3536;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
+  max-height: 500px;
 }
 
 .chat-header {
@@ -82,7 +83,6 @@ header h1 {
   flex: 1;
   padding: 10px;
   overflow-y: auto;
-  max-height: 500px;
 }
 
 .message {
@@ -160,7 +160,6 @@ header h1 {
   width: 50px;
 }
 
-/* Scrollbar styling */
 .chat-messages::-webkit-scrollbar {
   width: 6px;
 }
