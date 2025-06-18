@@ -89,8 +89,17 @@ header h1 {
   margin-bottom: 10px;
   padding: 8px;
   border-radius: 8px;
-  background: #3a4445;
   max-width: 80%;
+}
+
+.message.own {
+  background: #25D366;
+  margin-left: auto;
+}
+
+.message.other {
+  background: #3a4445;
+  margin-right: auto;
 }
 
 .message .username {
