@@ -133,6 +133,7 @@ ws.onmessage = function(event) {
     } else if (data.type === 'hostStatus') {
       isHost = data.isHost;
       video.controls = isHost;
+      video.classList.toggle('no-controls', !isHost);
       if (!isHost) {
         video.load();
         applyVideoState();
@@ -170,6 +171,13 @@ video.addEventListener('error', (e) => {
 
 video.addEventListener('loadstart', () => {
   videoContainer.classList.add('loading');
+});
+
+video.addEventListener('click', (e) => {
+  if (!isHost) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
 });
 
 chatMessages.addEventListener('DOMNodeInserted', () => {
