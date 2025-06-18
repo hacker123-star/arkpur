@@ -16,7 +16,8 @@ const syncInterval = 1000;
 let videoState = { time: 0, isPlaying: false };
 let videoReady = false;
 
-const ws = new WebSocket('wss://wonderful-destiny-open.glitch.me');
+// Replace with your Glitch WebSocket URL
+const ws = new WebSocket('wss://your-glitch-project-name.glitch.me/ws');
 
 function updateUsername() {
   const newUsername = usernameInput.value.trim();
