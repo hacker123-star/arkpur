@@ -95,11 +95,13 @@ header h1 {
 .message.own {
   background: #25D366;
   margin-left: auto;
+  color: #000000;
 }
 
 .message.other {
   background: #3a4445;
   margin-right: auto;
+  color: #e0e0e0;
 }
 
 .message .username {
@@ -118,6 +120,11 @@ header h1 {
   margin-bottom: 5px;
   border-radius: 4px;
   font-size: 0.9em;
+  color: #e0e0e0;
+}
+
+.message.own .reply {
+  color: #000000;
 }
 
 .reply-btn {
@@ -140,6 +147,7 @@ header h1 {
   border-radius: 4px;
   display: flex;
   align-items: center;
+  color: #e0e0e0;
 }
 
 .reply-preview button {
