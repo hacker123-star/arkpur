@@ -9,6 +9,7 @@ const replyText = document.getElementById('replyText');
 let currentReply = null;
 let username = localStorage.getItem('username') || `User${Math.floor(Math.random() * 1000)}`;
 usernameInput.value = username;
+let isHost = false;
 let lastSyncTime = 0;
 const syncInterval = 1000;
 let videoState = { time: 0, isPlaying: false };
@@ -78,6 +79,7 @@ function displayMessage(message) {
 }
 
 function syncVideoState() {
+  if (!isHost) return;
   const currentTime = video.currentTime;
   const isPlaying = !video.paused;
   if (Math.abs(currentTime - videoState.time) > 0.5 || isPlaying !== videoState.isPlaying) {
@@ -98,7 +100,7 @@ ws.onmessage = function(event) {
       }
       if (isPlaying && video.paused) {
         video.play().catch((e) => console.error('Play error:', e));
-      } else if (!isPlaying && !video.paused && data.type === 'video') {
+      } else if (!isPlaying && !video.paused) {
         video.pause();
       }
       videoState = { time: serverTime, isPlaying };
@@ -116,32 +118,28 @@ ws.onmessage = function(event) {
       usernameInput.value = username;
     } else if (data.type === 'usedUsernames') {
       usedUsernames = new Set(data.data);
+    } else if (data.type === 'hostStatus') {
+      isHost = data.isHost;
+      video.controls = isHost;
     }
   } catch (e) {
     console.error('WebSocket message error:', e);
   }
 };
 
-video.addEventListener('play', () => {
-  syncVideoState();
-});
-
-video.addEventListener('pause', () => {
-  syncVideoState();
-});
-
-video.addEventListener('seeked', () => {
-  syncVideoState();
-});
-
-video.addEventListener('timeupdate', () => {
-  if (Date.now() - lastSyncTime > syncInterval) {
-    syncVideoState();
-  }
-});
+if (isHost) {
+  video.addEventListener('play', syncVideoState);
+  video.addEventListener('pause', syncVideoState);
+  video.addEventListener('seeked', syncVideoState);
+  video.addEventListener('timeupdate', () => {
+    if (Date.now() - lastSyncTime > syncInterval) {
+      syncVideoState();
+    }
+  });
+}
 
 video.addEventListener('click', (e) => {
-  if (e.target.tagName === 'VIDEO') {
+  if (!isHost && e.target.tagName === 'VIDEO') {
     e.preventDefault();
   }
 });
