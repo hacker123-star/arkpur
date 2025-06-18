@@ -1,5 +1,6 @@
 // script.js
 const video = document.getElementById('videoPlayer');
+const videoContainer = document.getElementById('videoContainer');
 const chatMessages = document.getElementById('chatMessages');
 const chatInput = document.getElementById('chatInput');
 const usernameInput = document.getElementById('username');
@@ -13,6 +14,7 @@ let isHost = false;
 let lastSyncTime = 0;
 const syncInterval = 1000;
 let videoState = { time: 0, isPlaying: false };
+let videoReady = false;
 
 const ws = new WebSocket('wss://wonderful-destiny-open.glitch.me');
 
@@ -88,6 +90,10 @@ function syncVideoState() {
 }
 
 function applyVideoState() {
+  if (!videoReady) {
+    setTimeout(applyVideoState, 500);
+    return;
+  }
   if (Math.abs(video.currentTime - videoState.time) > 0.2) {
     video.currentTime = videoState.time;
   }
@@ -96,6 +102,7 @@ function applyVideoState() {
   } else if (!videoState.isPlaying && !video.paused) {
     video.pause();
   }
+  videoContainer.classList.remove('loading');
 }
 
 ws.onmessage = function(event) {
@@ -126,6 +133,10 @@ ws.onmessage = function(event) {
     } else if (data.type === 'hostStatus') {
       isHost = data.isHost;
       video.controls = isHost;
+      if (!isHost) {
+        video.load();
+        applyVideoState();
+      }
     }
   } catch (e) {
     console.error('WebSocket message error:', e);
@@ -144,11 +155,21 @@ if (isHost) {
 }
 
 video.addEventListener('loadedmetadata', () => {
+  videoReady = true;
   applyVideoState();
+});
+
+video.addEventListener('canplay', () => {
+  videoContainer.classList.remove('loading');
 });
 
 video.addEventListener('error', (e) => {
   console.error('Video error:', e);
+  videoContainer.classList.add('loading');
+});
+
+video.addEventListener('loadstart', () => {
+  videoContainer.classList.add('loading');
 });
 
 chatMessages.addEventListener('DOMNodeInserted', () => {
@@ -156,5 +177,7 @@ chatMessages.addEventListener('DOMNodeInserted', () => {
 });
 
 ws.onopen = function() {
+  video.load();
+  videoContainer.classList.add('loading');
   ws.send(JSON.stringify({ type: 'username', username }));
 };
