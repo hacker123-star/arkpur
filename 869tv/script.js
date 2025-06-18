@@ -94,7 +94,7 @@ ws.onmessage = function(event) {
       const serverTime = parseFloat(data.type === 'videoState' ? data.data.time : data.time);
       const isPlaying = data.type === 'videoState' ? data.data.isPlaying : data.isPlaying;
       const timeDiff = Math.abs(video.currentTime - serverTime);
-      if (timeDiff > 0.5 && Date.now() - lastSyncTime > syncInterval) {
+      if (timeDiff > 0.2) {
         video.currentTime = serverTime;
         lastSyncTime = Date.now();
       }
@@ -141,6 +141,15 @@ if (isHost) {
 video.addEventListener('click', (e) => {
   if (!isHost && e.target.tagName === 'VIDEO') {
     e.preventDefault();
+  }
+});
+
+video.addEventListener('loadedmetadata', () => {
+  if (videoState.time > 0) {
+    video.currentTime = videoState.time;
+    if (videoState.isPlaying) {
+      video.play().catch((e) => console.error('Play error:', e));
+    }
   }
 });
 
