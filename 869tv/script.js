@@ -4,33 +4,32 @@ const chat = document.getElementById("chat");
 const msgInput = document.getElementById("msg");
 const replyBox = document.getElementById("replyBox");
 
-let username = prompt("Enter your username:") || "Guest";
+let username = "";
 let replyTo = null;
+let isSyncing = false;
 
-// Video sync logic
-video.addEventListener("play", () => {
-  socket.emit("sync", { type: "play", time: video.currentTime });
-});
-video.addEventListener("pause", () => {
-  socket.emit("sync", { type: "pause", time: video.currentTime });
-});
-video.addEventListener("seeked", () => {
-  socket.emit("sync", { type: "seek", time: video.currentTime });
-});
+// Ask username once
+function askUsername() {
+  username = localStorage.getItem("username") || prompt("Enter username:");
+  socket.emit("register", username, (response) => {
+    if (!response.success) {
+      alert(response.message);
+      askUsername(); // Retry
+    } else {
+      localStorage.setItem("username", username);
+      loadChatHistory(response.chatMessages);
+      if (response.videoStatus) {
+        video.currentTime = response.videoStatus.time;
+        if (response.videoStatus.isPlaying) video.play();
+        else video.pause();
+      }
+    }
+  });
+}
 
-socket.on("sync", (data) => {
-  if (data.type === "play") {
-    video.currentTime = data.time;
-    video.play();
-  } else if (data.type === "pause") {
-    video.currentTime = data.time;
-    video.pause();
-  } else if (data.type === "seek") {
-    video.currentTime = data.time;
-  }
-});
+askUsername();
 
-// Chat logic
+// Chat system
 function sendMessage() {
   const text = msgInput.value.trim();
   if (!text) return;
@@ -40,7 +39,13 @@ function sendMessage() {
   replyBox.classList.add("hidden");
 }
 
-socket.on("chat", ({ text, username: from, replyTo }) => {
+function loadChatHistory(messages) {
+  messages.forEach((msg) => renderMessage(msg));
+}
+
+socket.on("chat", renderMessage);
+
+function renderMessage({ text, username: from, replyTo }) {
   const div = document.createElement("div");
   div.className = "msg " + (from === username ? "right" : "left");
 
@@ -60,9 +65,33 @@ socket.on("chat", ({ text, username: from, replyTo }) => {
 
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
+}
+
+// Video sync logic with loop prevention
+video.addEventListener("play", () => {
+  if (isSyncing) return;
+  socket.emit("sync", { type: "play", time: video.currentTime });
+});
+
+video.addEventListener("pause", () => {
+  if (isSyncing) return;
+  socket.emit("sync", { type: "pause", time: video.currentTime });
+});
+
+video.addEventListener("seeked", () => {
+  if (isSyncing) return;
+  socket.emit("sync", { type: "seek", time: video.currentTime });
+});
+
+socket.on("sync", (data) => {
+  isSyncing = true;
+  video.currentTime = data.time;
+  if (data.type === "play") video.play();
+  if (data.type === "pause") video.pause();
+  isSyncing = false;
 });
 
 function changeUsername() {
-  const newName = prompt("Enter new username:");
-  if (newName) username = newName;
-}
+  localStorage.removeItem("username");
+  location.reload();
+                      }
