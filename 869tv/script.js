@@ -57,7 +57,7 @@ function replyToMessage(message) {
 
 function displayMessage(message) {
   const messageDiv = document.createElement('div');
-  messageDiv.className = 'message';
+  messageDiv.className = `message ${message.username === username ? 'own' : 'other'}`;
   
   if (message.reply) {
     const replyDiv = document.createElement('div');
@@ -97,7 +97,7 @@ ws.onmessage = function(event) {
       }
       if (isPlaying && video.paused) {
         video.play().catch((e) => console.error('Play error:', e));
-      } else if (!isPlaying && !video.paused) {
+      } else if (!isPlaying && !video.paused && data.type !== 'videoState') {
         video.pause();
       }
       videoState = { time: serverTime, isPlaying };
