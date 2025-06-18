@@ -1,68 +1,138 @@
-// === Updated script.js === 
-const socket = io("https://wonderful-destiny-open.glitch.me/");
+// script.js
+const video = document.getElementById('videoPlayer');
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+const usernameInput = document.getElementById('username');
+const replyPreview = document.getElementById('replyPreview');
+const replyUsername = document.getElementById('replyUsername');
+const replyText = document.getElementById('replyText');
+let currentReply = null;
 
-const video = document.getElementById("video"); const chat = document.getElementById("chat"); const msgInput = document.getElementById("msg"); const replyBox = document.getElementById("replyBox");
+// Load username from local storage
+let username = localStorage.getItem('username') || `User${Math.floor(Math.random() * 1000)}`;
+usernameInput.value = username;
 
-let username = ""; let isHost = false; let currentHost = "Rovan"; let replyTo = null; let ignoreNextEvent = false;
+// WebSocket connection to Glitch backend
+const ws = new WebSocket('wss://wonderful-destiny-open.glitch.me:8080');
 
-function emitSync(type) { if (!isHost) return; socket.emit("sync", { type, time: video.currentTime, from: username }); }
-
-video.addEventListener("play", () => { if (!ignoreNextEvent) emitSync("play"); });
-
-video.addEventListener("pause", () => { if (!ignoreNextEvent) emitSync("pause"); });
-
-video.addEventListener("seeked", () => { if (isHost) emitSync("seek"); });
-
-socket.on("sync", (data) => { if (data.from === username) return;
-
-ignoreNextEvent = true; const shouldUpdateTime = Math.abs(video.currentTime - data.time) > 0.3; if (shouldUpdateTime) video.currentTime = data.time;
-
-if (data.type === "play") { video.play().catch(() => {}); } else if (data.type === "pause") { video.pause(); }
-
-setTimeout(() => (ignoreNextEvent = false), 500); });
-
-function askUsername() { username = localStorage.getItem("username") || prompt("Enter your username:"); socket.emit("register", username, (res) => { if (!res.success) { alert(res.message); askUsername(); } else { isHost = username === res.currentHost; currentHost = res.currentHost; localStorage.setItem("username", username);
-
-if (res.videoStatus) {
-    video.currentTime = res.videoStatus.time;
-    setTimeout(() => {
-      if (res.videoStatus.isPlaying) {
-        video.play().catch(() => {});
-      } else {
-        video.pause();
-      }
-    }, 300);
+// Update username
+function updateUsername() {
+  const newUsername = usernameInput.value.trim();
+  if (newUsername) {
+    username = newUsername;
+    localStorage.setItem('username', username);
+    alert('Username updated!');
   }
-
-  loadChatHistory(res.chatMessages);
-  showHostStatus();
 }
 
-}); } askUsername();
+// Send message
+function sendMessage() {
+  const text = chatInput.value.trim();
+  if (text) {
+    const message = {
+      username,
+      text,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      reply: currentReply
+    };
+    ws.send(JSON.stringify({ type: 'chat', message }));
+    chatInput.value = '';
+    cancelReply();
+  }
+}
 
-function changeUsername() { localStorage.removeItem("username"); location.reload(); }
+// Handle Enter key for sending messages
+chatInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    sendMessage();
+  }
+});
 
-function showHostStatus() { document.querySelector(".header span").textContent = 869tv Chat — Host: ${currentHost}; }
+// Cancel reply
+function cancelReply() {
+  currentReply = null;
+  replyPreview.style.display = 'none';
+}
 
-socket.on("hostChanged", (newHost) => { currentHost = newHost; isHost = (username === newHost); showHostStatus(); alert(Host changed to ${newHost}); });
+// Reply to message
+function replyToMessage(message) {
+  currentReply = message;
+  replyUsername.textContent = message.username;
+  replyText.textContent = message.text;
+  replyPreview.style.display = 'flex';
+  chatInput.focus();
+}
 
-function sendMessage() { const text = msgInput.value.trim(); if (!text) return;
+// Display message
+function displayMessage(message) {
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'message';
+  
+  if (message.reply) {
+    const replyDiv = document.createElement('div');
+    replyDiv.className = 'reply';
+    replyDiv.innerHTML = `<span>${message.reply.username}:</span> ${message.reply.text}`;
+    messageDiv.appendChild(replyDiv);
+  }
+  
+  messageDiv.innerHTML += `
+    <div class="username">${message.username}</div>
+    <div class="text">${message.text}</div>
+    <div class="time">${message.time}</div>
+    <button class="reply-btn" onclick='replyToMessage(${JSON.stringify(message)})'>Reply</button>
+  `;
+  chatMessages.appendChild(messageDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
 
-if (text.startsWith("@host ")) { const newHost = text.split(" ")[1]; if (newHost) { socket.emit("changeHost", newHost); } } else { socket.emit("chat", { text, username, replyTo }); }
+// WebSocket events
+ws.onmessage = function(event) {
+  const data = JSON.parse(event.data);
+  if (data.type === 'videoState') {
+    video.currentTime = parseFloat(data.data.time);
+    if (data.data.isPlaying) {
+      video.play().catch((e) => console.error('Play error:', e));
+    } else {
+      video.pause();
+    }
+  } else if (data.type === 'video') {
+    video.currentTime = parseFloat(data.time);
+    if (data.isPlaying) {
+      video.play().catch((e) => console.error('Play error:', e));
+    } else {
+      video.pause();
+    }
+  } else if (data.type === 'chat') {
+    displayMessage(data.message);
+  }
+};
 
-msgInput.value = ""; replyTo = null; replyBox.classList.add("hidden"); }
+// Video sync events
+video.addEventListener('play', () => {
+  ws.send(JSON.stringify({ type: 'video', time: video.currentTime, isPlaying: true }));
+});
 
-function loadChatHistory(messages) { messages.forEach(renderMessage); }
+video.addEventListener('pause', () => {
+  ws.send(JSON.stringify({ type: 'video', time: video.currentTime, isPlaying: false }));
+});
 
-socket.on("chat", renderMessage);
+video.addEventListener('seeked', () => {
+  ws.send(JSON.stringify({ type: 'video', time: video.currentTime, isPlaying: !video.paused }));
+});
 
-function renderMessage({ text, username: from, replyTo }) { const div = document.createElement("div"); div.className = "msg " + (from === username ? "right" : "left");
+// Prevent local control conflicts
+video.addEventListener('click', (e) => {
+  if (e.target.tagName === 'VIDEO') {
+    e.preventDefault();
+  }
+});
 
-if (replyTo) { const reply = document.createElement("div"); reply.className = "reply-box"; reply.innerText = ${replyTo.username}: ${replyTo.text}; div.appendChild(reply); }
+// Auto-scroll chat
+chatMessages.addEventListener('DOMNodeInserted', () => {
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+});
 
-const msg = document.createElement("div"); msg.innerHTML = <b>${from}</b>: ${text}; div.appendChild(msg);
-
-div.onclick = () => { replyTo = { username: from, text }; replyBox.innerText = Replying to ${from}: ${text}; replyBox.classList.remove("hidden"); };
-
-chat.appendChild(div); chat.scrollTop = chat.scrollHeight; }
-
+// Initial sync request
+ws.onopen = function() {
+  ws.send(JSON.stringify({ type: 'requestState' }));
+};
