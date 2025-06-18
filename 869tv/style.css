@@ -56,11 +56,13 @@ header h1 {
 
 .video-section {
   width: 100%;
+  display: block;
 }
 
 #videoPlayer {
   width: 100%;
   border-radius: 8px;
+  display: block;
 }
 
 .chat-section {
