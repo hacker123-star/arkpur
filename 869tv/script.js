@@ -87,23 +87,28 @@ function syncVideoState() {
   }
 }
 
+function applyVideoState() {
+  if (Math.abs(video.currentTime - videoState.time) > 0.2) {
+    video.currentTime = videoState.time;
+  }
+  if (videoState.isPlaying && video.paused) {
+    video.play().catch((e) => console.error('Play error:', e));
+  } else if (!videoState.isPlaying && !video.paused) {
+    video.pause();
+  }
+}
+
 ws.onmessage = function(event) {
   try {
     const data = JSON.parse(event.data);
     if (data.type === 'videoState' || data.type === 'video') {
       const serverTime = parseFloat(data.type === 'videoState' ? data.data.time : data.time);
       const isPlaying = data.type === 'videoState' ? data.data.isPlaying : data.isPlaying;
-      const timeDiff = Math.abs(video.currentTime - serverTime);
-      if (timeDiff > 0.2) {
-        video.currentTime = serverTime;
-        lastSyncTime = Date.now();
-      }
-      if (isPlaying && video.paused) {
-        video.play().catch((e) => console.error('Play error:', e));
-      } else if (!isPlaying && !video.paused) {
-        video.pause();
-      }
       videoState = { time: serverTime, isPlaying };
+      if (!isHost) {
+        applyVideoState();
+      }
+      lastSyncTime = Date.now();
     } else if (data.type === 'chat') {
       displayMessage(data.message);
     } else if (data.type === 'chatHistory') {
@@ -138,19 +143,12 @@ if (isHost) {
   });
 }
 
-video.addEventListener('click', (e) => {
-  if (!isHost && e.target.tagName === 'VIDEO') {
-    e.preventDefault();
-  }
+video.addEventListener('loadedmetadata', () => {
+  applyVideoState();
 });
 
-video.addEventListener('loadedmetadata', () => {
-  if (videoState.time > 0) {
-    video.currentTime = videoState.time;
-    if (videoState.isPlaying) {
-      video.play().catch((e) => console.error('Play error:', e));
-    }
-  }
+video.addEventListener('error', (e) => {
+  console.error('Video error:', e);
 });
 
 chatMessages.addEventListener('DOMNodeInserted', () => {
