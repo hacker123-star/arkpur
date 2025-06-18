@@ -69,6 +69,10 @@ header h1 {
   display: block;
 }
 
+#videoPlayer.no-controls {
+  pointer-events: none;
+}
+
 .video-section::after {
   content: 'Loading video...';
   position: absolute;
