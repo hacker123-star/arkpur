@@ -11,6 +11,7 @@ let username = localStorage.getItem('username') || `User${Math.floor(Math.random
 usernameInput.value = username;
 let lastSyncTime = 0;
 const syncInterval = 1000;
+let videoState = { time: 0, isPlaying: false };
 
 const ws = new WebSocket('wss://wonderful-destiny-open.glitch.me');
 
@@ -97,12 +98,14 @@ ws.onmessage = function(event) {
       }
       if (isPlaying && video.paused) {
         video.play().catch((e) => console.error('Play error:', e));
-      } else if (!isPlaying && !video.paused && data.type !== 'videoState') {
+      } else if (!isPlaying && !video.paused && data.type === 'video') {
         video.pause();
       }
       videoState = { time: serverTime, isPlaying };
     } else if (data.type === 'chat') {
       displayMessage(data.message);
+    } else if (data.type === 'chatHistory') {
+      data.messages.forEach(displayMessage);
     } else if (data.type === 'usernameSuccess') {
       username = data.username;
       localStorage.setItem('username', username);
