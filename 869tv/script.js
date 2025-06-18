@@ -1,3 +1,4 @@
+
 const socket = io("https://wonderful-destiny-open.glitch.me/"); // Replace with your actual Glitch backend URL
 
 const video = document.getElementById("video");
@@ -18,27 +19,35 @@ function emitSync(type) {
   socket.emit("sync", { type, time: video.currentTime, from: username });
 }
 
-// Listen for video sync updates
+// Handle incoming sync events
 socket.on("sync", (data) => {
-  if (data.from === username) return; // Ignore own sync events
+  if (data.from === username) return; // Ignore self-sync
 
   isSyncing = true;
-  if (syncTimeout) clearTimeout(syncTimeout);
+  clearTimeout(syncTimeout);
   syncTimeout = setTimeout(() => isSyncing = false, 1000);
 
-  video.currentTime = data.time;
+  if (Math.abs(video.currentTime - data.time) > 0.3) {
+    video.currentTime = data.time;
+  }
 
-  if (data.type === "play") {
+  if (data.type === "play" && video.paused) {
     video.play().catch(() => {});
-  } else if (data.type === "pause") {
+  } else if (data.type === "pause" && !video.paused) {
     video.pause();
   }
 });
 
-// Handle video events
-video.addEventListener("play", () => emitSync("play"));
-video.addEventListener("pause", () => emitSync("pause"));
-video.addEventListener("seeked", () => emitSync("seek"));
+// Register video events
+video.addEventListener("play", () => {
+  if (!isSyncing && isHost) emitSync("play");
+});
+video.addEventListener("pause", () => {
+  if (!isSyncing && isHost) emitSync("pause");
+});
+video.addEventListener("seeked", () => {
+  if (!isSyncing && isHost) emitSync("seek");
+});
 
 // Register username
 function askUsername() {
@@ -46,7 +55,7 @@ function askUsername() {
   socket.emit("register", username, (res) => {
     if (!res.success) {
       alert(res.message);
-      askUsername(); // Ask again
+      askUsername(); // Ask again if name taken
     } else {
       isHost = username === res.currentHost;
       currentHost = res.currentHost;
@@ -54,7 +63,7 @@ function askUsername() {
 
       if (res.videoStatus) {
         video.currentTime = res.videoStatus.time;
-        res.videoStatus.isPlaying ? video.play() : video.pause();
+        res.videoStatus.isPlaying ? video.play().catch(() => {}) : video.pause();
       }
 
       loadChatHistory(res.chatMessages);
@@ -64,44 +73,54 @@ function askUsername() {
 }
 askUsername();
 
+// Optional: to let user change name later
 function changeUsername() {
   localStorage.removeItem("username");
   location.reload();
 }
 
+// Show host status
 function showHostStatus() {
   document.querySelector(".header span").textContent =
     `869tv Chat — Host: ${currentHost}`;
 }
 
-// Host update
+// Host changed
 socket.on("hostChanged", (newHost) => {
   currentHost = newHost;
-  isHost = username === newHost;
+  isHost = (username === newHost);
   showHostStatus();
   alert(`Host changed to ${newHost}`);
 });
 
-// Chat send
+// Send message
 function sendMessage() {
   const text = msgInput.value.trim();
   if (!text) return;
 
-  socket.emit("chat", { text, username, replyTo });
+  if (text.startsWith("@host ")) {
+    const newHost = text.split(" ")[1];
+    if (newHost) {
+      socket.emit("changeHost", newHost);
+    }
+  } else {
+    socket.emit("chat", { text, username, replyTo });
+  }
+
   msgInput.value = "";
   replyTo = null;
   replyBox.classList.add("hidden");
 }
 
-// Load full chat history
+// Load existing chat messages
 function loadChatHistory(messages) {
-  messages.forEach((msg) => renderMessage(msg));
+  messages.forEach(renderMessage);
 }
 
-// Handle new message
+// Render incoming chat message
 socket.on("chat", renderMessage);
 
-// Render message with reply support
+// Render chat bubble with reply support
 function renderMessage({ text, username: from, replyTo }) {
   const div = document.createElement("div");
   div.className = "msg " + (from === username ? "right" : "left");
