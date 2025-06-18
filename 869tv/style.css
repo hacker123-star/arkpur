@@ -57,11 +57,30 @@ header h1 {
 .video-section {
   width: 100%;
   display: block;
+  position: relative;
+  background: #000000;
+  border-radius: 8px;
 }
 
 #videoPlayer {
   width: 100%;
+  height: auto;
   border-radius: 8px;
+  display: block;
+}
+
+.video-section::after {
+  content: 'Loading video...';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #e0e0e0;
+  font-size: 1.2em;
+  display: none;
+}
+
+.video-section.loading::after {
   display: block;
 }
 
