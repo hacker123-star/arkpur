@@ -7,29 +7,57 @@ const replyBox = document.getElementById("replyBox");
 let username = "";
 let replyTo = null;
 let isSyncing = false;
+let syncTimeout = null;
 
-// Ask username once
+function emitSync(type) {
+  if (isSyncing) return;
+  socket.emit("sync", { type, time: video.currentTime });
+}
+
+// Setup event listeners for sync
+video.addEventListener("play", () => emitSync("play"));
+video.addEventListener("pause", () => emitSync("pause"));
+video.addEventListener("seeked", () => emitSync("seek"));
+
+socket.on("sync", (data) => {
+  isSyncing = true;
+  if (syncTimeout) clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(() => { isSyncing = false }, 1000);
+
+  video.currentTime = data.time;
+
+  if (data.type === "play" && video.paused) {
+    video.play();
+  } else if (data.type === "pause" && !video.paused) {
+    video.pause();
+  }
+});
+
+// Register username
 function askUsername() {
-  username = localStorage.getItem("username") || prompt("Enter username:");
-  socket.emit("register", username, (response) => {
-    if (!response.success) {
-      alert(response.message);
-      askUsername(); // Retry
+  username = localStorage.getItem("username") || prompt("Enter your username:");
+  socket.emit("register", username, (res) => {
+    if (!res.success) {
+      alert(res.message);
+      askUsername();
     } else {
       localStorage.setItem("username", username);
-      loadChatHistory(response.chatMessages);
-      if (response.videoStatus) {
-        video.currentTime = response.videoStatus.time;
-        if (response.videoStatus.isPlaying) video.play();
-        else video.pause();
+      if (res.videoStatus) {
+        video.currentTime = res.videoStatus.time;
+        res.videoStatus.isPlaying ? video.play() : video.pause();
       }
+      loadChatHistory(res.chatMessages);
     }
   });
 }
-
 askUsername();
 
-// Chat system
+function changeUsername() {
+  localStorage.removeItem("username");
+  location.reload();
+}
+
+// Chat
 function sendMessage() {
   const text = msgInput.value.trim();
   if (!text) return;
@@ -66,32 +94,3 @@ function renderMessage({ text, username: from, replyTo }) {
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
 }
-
-// Video sync logic with loop prevention
-video.addEventListener("play", () => {
-  if (isSyncing) return;
-  socket.emit("sync", { type: "play", time: video.currentTime });
-});
-
-video.addEventListener("pause", () => {
-  if (isSyncing) return;
-  socket.emit("sync", { type: "pause", time: video.currentTime });
-});
-
-video.addEventListener("seeked", () => {
-  if (isSyncing) return;
-  socket.emit("sync", { type: "seek", time: video.currentTime });
-});
-
-socket.on("sync", (data) => {
-  isSyncing = true;
-  video.currentTime = data.time;
-  if (data.type === "play") video.play();
-  if (data.type === "pause") video.pause();
-  isSyncing = false;
-});
-
-function changeUsername() {
-  localStorage.removeItem("username");
-  location.reload();
-                      }
