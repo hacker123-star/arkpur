@@ -1,6 +1,5 @@
-
-
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,21 +8,34 @@
 </head>
 <body>
   <div class="container">
-    <video id="video" controls>
-      <source src="assets/dandan.mp4" type="video/mp4">
-      Your browser does not support HTML5 video.
-    </video><div class="chat-section">
-  <div class="header"><span>869tv Chat</span> <button onclick="changeUsername()">Change Username</button></div>
-  <div id="chat"></div>
-  <div id="replyBox" class="hidden"></div>
-  <div class="input">
-    <input type="text" id="msg" placeholder="Type a message...">
-    <button onclick="sendMessage()">Send</button>
+    <header>
+      <h1>869tv</h1>
+      <div class="user-settings">
+        <input type="text" id="username" placeholder="Enter username" maxlength="15">
+        <button onclick="updateUsername()">Set Username</button>
+      </div>
+    </header>
+    <div class="main">
+      <div class="video-section">
+        <video id="videoPlayer" controls>
+          <source src="assets/dandan.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+      <div class="chat-section">
+        <div class="chat-header">Chat</div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input">
+          <div id="replyPreview" class="reply-preview" style="display: none;">
+            <span id="replyUsername"></span>: <span id="replyText"></span>
+            <button onclick="cancelReply()">X</button>
+          </div>
+          <input type="text" id="chatInput" placeholder="Type a message..." maxlength="500">
+          <button onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
-
-  </div>
-  <script src="/socket.io/socket.io.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
